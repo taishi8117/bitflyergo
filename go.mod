@@ -1,4 +1,4 @@
-module github.com/mitsutoshi/pkg/bitflyergo
+module github.com/mitsutoshi/bitflyergo
 
 go 1.13
 
