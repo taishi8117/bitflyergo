@@ -1,15 +1,13 @@
-package bitflyergo_test
+package bitflyergo
 
 import (
 	"fmt"
 	"testing"
 	"time"
-
-	"github.com/mitsutoshi/bitflyergo/pkg/bitflyergo"
 )
 
 func TestCreateOHLC1Sec(t *testing.T) {
-	candles, err := bitflyergo.CreateOHLC(getExecutions(), 1)
+	candles, err := CreateOHLC(getExecutions(), 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +25,7 @@ func TestCreateOHLC1Sec(t *testing.T) {
 }
 
 func TestCreateOHLC2Sec(t *testing.T) {
-	candles, err := bitflyergo.CreateOHLC(getExecutions(), 2)
+	candles, err := CreateOHLC(getExecutions(), 2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +38,7 @@ func TestCreateOHLC2Sec(t *testing.T) {
 }
 
 func TestCreateOHLC5Sec(t *testing.T) {
-	candles, err := bitflyergo.CreateOHLC(getExecutions(), 5)
+	candles, err := CreateOHLC(getExecutions(), 5)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +66,7 @@ func TestCreateOHLC5Sec(t *testing.T) {
 }
 
 func TestCreateOHLC10Sec(t *testing.T) {
-	candles, err := bitflyergo.CreateOHLC(getExecutions(), 10)
+	candles, err := CreateOHLC(getExecutions(), 10)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +78,7 @@ func TestCreateOHLC10Sec(t *testing.T) {
 	}
 }
 
-func getExecutions() []bitflyergo.Execution {
+func getExecutions() []Execution {
 
 	execDate1, _ := time.Parse(time.RFC3339Nano, "2019-03-01T00:00:00.0Z")
 	execDate2, _ := time.Parse(time.RFC3339Nano, "2019-03-01T00:00:01.0Z")
@@ -91,14 +89,14 @@ func getExecutions() []bitflyergo.Execution {
 	execDate7, _ := time.Parse(time.RFC3339Nano, "2019-03-01T00:00:10.0Z")
 	execDate8, _ := time.Parse(time.RFC3339Nano, "2019-03-01T00:00:10.999Z")
 
-	e1 := bitflyergo.Execution{Id: 1, ExecDate: execDate1, Price: 100, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-1", SellChildOrderAcceptanceId: "sell-1", Delay: 100 * time.Millisecond}
-	e2 := bitflyergo.Execution{Id: 2, ExecDate: execDate2, Price: 102, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 200 * time.Millisecond}
-	e3 := bitflyergo.Execution{Id: 3, ExecDate: execDate3, Price: 99, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 300 * time.Millisecond}
-	e4 := bitflyergo.Execution{Id: 4, ExecDate: execDate4, Price: 101, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 400 * time.Millisecond}
-	e5 := bitflyergo.Execution{Id: 5, ExecDate: execDate5, Price: 110, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 500 * time.Millisecond}
-	e6 := bitflyergo.Execution{Id: 6, ExecDate: execDate6, Price: 120, Size: 0.01, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 600 * time.Millisecond}
-	e7 := bitflyergo.Execution{Id: 7, ExecDate: execDate7, Price: 200, Size: 0.01, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 1500 * time.Millisecond}
-	e8 := bitflyergo.Execution{Id: 8, ExecDate: execDate8, Price: 300, Size: 1.01, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 500 * time.Millisecond}
-	executions := []bitflyergo.Execution{e1, e2, e3, e4, e5, e6, e7, e8}
+	e1 := Execution{Id: 1, ExecDate: execDate1, Price: 100, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-1", SellChildOrderAcceptanceId: "sell-1", Delay: 100 * time.Millisecond}
+	e2 := Execution{Id: 2, ExecDate: execDate2, Price: 102, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 200 * time.Millisecond}
+	e3 := Execution{Id: 3, ExecDate: execDate3, Price: 99, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 300 * time.Millisecond}
+	e4 := Execution{Id: 4, ExecDate: execDate4, Price: 101, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 400 * time.Millisecond}
+	e5 := Execution{Id: 5, ExecDate: execDate5, Price: 110, Size: 0.1, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 500 * time.Millisecond}
+	e6 := Execution{Id: 6, ExecDate: execDate6, Price: 120, Size: 0.01, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 600 * time.Millisecond}
+	e7 := Execution{Id: 7, ExecDate: execDate7, Price: 200, Size: 0.01, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 1500 * time.Millisecond}
+	e8 := Execution{Id: 8, ExecDate: execDate8, Price: 300, Size: 1.01, Side: "BUY", BuyChildOrderAcceptanceId: "buy-2", SellChildOrderAcceptanceId: "sell-2", Delay: 500 * time.Millisecond}
+	executions := []Execution{e1, e2, e3, e4, e5, e6, e7, e8}
 	return executions
 }
