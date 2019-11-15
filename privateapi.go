@@ -6,18 +6,18 @@ import (
 )
 
 var (
-	pathGetMyExecutions      = "/me/getexecutions"
-	pathGetChildOrders       = "/me/getchildorders"
-	pathGetPositions         = "/me/getpositions"
-	pathGetCollateral        = "/me/getcollateral"
-	pathGetBalance           = "/me/getbalance"
-	pathSendChildOrder       = "/me/sendchildorder"
-	pathCancelChildOrder     = "/me/cancelchildorder"
-	pathCancelAllChildOrders = "/me/cancelallchildorders"
+	PathGetMyExecutions      = "/me/getexecutions"
+	PathGetChildOrders       = "/me/getchildorders"
+	PathGetPositions         = "/me/getpositions"
+	PathGetCollateral        = "/me/getcollateral"
+	PathGetBalance           = "/me/getbalance"
+	PathSendChildOrder       = "/me/sendchildorder"
+	PathCancelChildOrder     = "/me/cancelchildorder"
+	PathCancelAllChildOrders = "/me/cancelallchildorders"
 )
 
 func (bf *Bitflyer) GetMyExecutions(params map[string]string) ([]MyExecution, error) {
-	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+pathGetMyExecutions, params)
+	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+PathGetMyExecutions, params)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (bf *Bitflyer) GetMyExecutions(params map[string]string) ([]MyExecution, er
 }
 
 func (bf *Bitflyer) GetChildOrders(params map[string]string) ([]ChildOrder, error) {
-	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+pathGetChildOrders, params)
+	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+PathGetChildOrders, params)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (bf *Bitflyer) GetChildOrders(params map[string]string) ([]ChildOrder, erro
 
 func (bf *Bitflyer) GetPositions(productCode string) ([]Position, error) {
 	params := map[string]string{"product_code": productCode}
-	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+pathGetPositions, params)
+	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+PathGetPositions, params)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (bf *Bitflyer) GetPositions(productCode string) ([]Position, error) {
 }
 
 func (bf *Bitflyer) GetCollateral() (*Collateral, error) {
-	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+pathGetCollateral, nil)
+	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+PathGetCollateral, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (bf *Bitflyer) GetCollateral() (*Collateral, error) {
 }
 
 func (bf *Bitflyer) GetBalance() (*[]Balance, error) {
-	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+pathGetBalance, nil)
+	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+PathGetBalance, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (bf *Bitflyer) SendChildOrder(productCode string, childOrderType string,
 	params["side"] = side
 	params["size"] = strconv.FormatFloat(size, 'g', 8, 64)
 
-	res, err := bf.callApiWithRetry("POST", "/v"+bf.ApiVersion+pathSendChildOrder, params)
+	res, err := bf.callApiWithRetry("POST", "/v"+bf.ApiVersion+PathSendChildOrder, params)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func (bf *Bitflyer) CancelAllChildOrders(productCode string) error {
 	params := map[string]string{
 		"product_code": productCode,
 	}
-	_, err := bf.callApiWithRetry("POST", "/v"+bf.ApiVersion+pathCancelAllChildOrders, params)
+	_, err := bf.callApiWithRetry("POST", "/v"+bf.ApiVersion+PathCancelAllChildOrders, params)
 	return err
 }
 
@@ -120,6 +120,6 @@ func (bf *Bitflyer) CancelChildOrder(productCode string, childOrderAcceptanceId 
 		"product_code":              productCode,
 		"child_order_acceptance_id": childOrderAcceptanceId,
 	}
-	_, err := bf.callApiWithRetry("POST", "/v"+bf.ApiVersion+pathCancelChildOrder, params)
+	_, err := bf.callApiWithRetry("POST", "/v"+bf.ApiVersion+PathCancelChildOrder, params)
 	return err
 }

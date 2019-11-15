@@ -6,16 +6,16 @@ import (
 )
 
 var (
-	pathGetMarkets    = "/getmarkets"
-	pathGetBoard      = "/getboard"
-	pathGetTicker     = "/getticker"
-	pathGetExecutions = "/getexecutions"
-	pathGetBoardState = "/getboardstate"
-	pathGetHealth     = "/gethealth"
+	PathGetMarkets    = "/getmarkets"
+	PathGetBoard      = "/getboard"
+	PathGetTicker     = "/getticker"
+	PathGetExecutions = "/getexecutions"
+	PathGetBoardState = "/getboardstate"
+	PathGetHealth     = "/gethealth"
 )
 
 func (bf *Bitflyer) GetMarkets() (*[]Market, error) {
-	res, err := bf.get(bf.getUrl(pathGetMarkets), nil, bf.getDefaultHeaders())
+	res, err := bf.get(bf.getUrl(PathGetMarkets), nil, bf.getDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (bf *Bitflyer) GetMarkets() (*[]Market, error) {
 
 func (bf *Bitflyer) GetTicker(productCode string) (*Ticker, error) {
 	params := map[string]string{"product_code": productCode}
-	res, err := bf.get(bf.getUrl(pathGetTicker), params, bf.getDefaultHeaders())
+	res, err := bf.get(bf.getUrl(PathGetTicker), params, bf.getDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (bf *Bitflyer) GetTicker(productCode string) (*Ticker, error) {
 }
 
 func (bf *Bitflyer) GetExecutions(params map[string]string) ([]Execution, error) {
-	res, err := bf.get(bf.getUrl(pathGetExecutions), params, bf.getDefaultHeaders())
+	res, err := bf.get(bf.getUrl(PathGetExecutions), params, bf.getDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (bf *Bitflyer) GetExecutions(params map[string]string) ([]Execution, error)
 
 func (bf *Bitflyer) GetBoard(productCode string) (*Board, error) {
 	params := map[string]string{"product_code": productCode}
-	res, err := bf.get(bf.getUrl(pathGetBoard), params, bf.getDefaultHeaders())
+	res, err := bf.get(bf.getUrl(PathGetBoard), params, bf.getDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (bf *Bitflyer) GetBoard(productCode string) (*Board, error) {
 
 func (bf *Bitflyer) GetBoardState(productCode string) (*BoardState, error) {
 	params := map[string]string{"product_code": productCode}
-	res, err := bf.get(bf.getUrl(pathGetBoardState), params, bf.getDefaultHeaders())
+	res, err := bf.get(bf.getUrl(PathGetBoardState), params, bf.getDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (bf *Bitflyer) GetBoardState(productCode string) (*BoardState, error) {
 }
 
 func (bf *Bitflyer) GetHealth() (*Health, error) {
-	res, err := bf.get(bf.getUrl(pathGetHealth), nil, bf.getDefaultHeaders())
+	res, err := bf.get(bf.getUrl(PathGetHealth), nil, bf.getDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
