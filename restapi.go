@@ -1,9 +1,6 @@
 package bitflyergo
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -176,12 +173,6 @@ func (bf *Bitflyer) request(method string, url string, headers map[string]string
 		return nil, apiErr
 	}
 	return body, nil
-}
-
-func sign(message string, key string) string {
-	mac := hmac.New(sha256.New, []byte(key))
-	mac.Write([]byte(message))
-	return hex.EncodeToString(mac.Sum(nil))
 }
 
 func makeQueryString(params map[string]string) string {

@@ -101,19 +101,16 @@ func (tt *TickerTime) UnmarshalJSON(data []byte) error {
 	return err
 }
 
-// 板の状態
 type BoardState struct {
 	Health string             `json:"health"`
 	State  string             `json:"state"`
 	Data   map[string]float64 `json:"data"`
 }
 
-// 取引所の状態
 type Health struct {
 	Status string `json:"status"`
 }
 
-// 証拠金
 type Collateral struct {
 	Collateral        float64 `json:"collateral"`
 	OpenPositionPnl   float64 `json:"open_position_pnl"`
@@ -121,14 +118,12 @@ type Collateral struct {
 	KeepRate          float64 `json:"keep_rate"`
 }
 
-// 資産残高
 type Balance struct {
 	CurrencyCode string `json:"currency_code"`
 	Amount       int64  `json:"amount"`
 	Available    int64  `json:"available"`
 }
 
-// 注文
 type ChildOrder struct {
 	Id                     int64     `json:"id"`
 	ChildOrderId           string    `json:"child_order_id"`
