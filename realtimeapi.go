@@ -1,11 +1,15 @@
 package bitflyergo
 
 import (
-	//"encoding/json"
+	"encoding/hex"
 	"log"
 	url2 "net/url"
+	"strconv"
 	"strings"
 	"time"
+
+	"crypto/rand"
+	"encoding/json"
 
 	"github.com/gorilla/websocket"
 )
@@ -16,22 +20,68 @@ const (
 	channelBoardSnapshot = "lightning_board_snapshot_"
 	channelExecutions    = "lightning_executions_"
 	channelTicker        = "lightning_ticker_"
+	channelChildOrder    = "child_order_events"
+	channelParentOrder   = "parent_order_events"
+	authJsonRpcId        = 1
 )
 
 type SubscribeParams struct {
 	Channel string `json:"channel"`
 }
 
+type AuthParams struct {
+	ApiKey    string `json:"api_key"`
+	Timestamp int64  `json:"timestamp"`
+	Nonce     string `json:"nonce"`
+	Signature string `json:"signature"`
+}
+
 type JsonRPC2 struct {
-	Version string      `json:"jsonrpc"`
+	Version string      `json:"version"`
 	Method  string      `json:"method"`
 	Params  interface{} `json:"params"`
-	Result  interface{} `json:"result"`
+	Id      int         `json:"id"`
 }
 
 type WebSocketClient struct {
 	Con   *websocket.Conn
 	Debug bool
+}
+
+// Event of child order happened.
+type ChildOrderEvent struct {
+	ProductCode            string  `json:"product_code"`
+	ChildOrderId           string  `json:"child_order_id"`
+	ChildOrderAcceptanceId string  `json:"child_order_acceptance_id"`
+	EventDate              string  `json:"event_date"`
+	EventType              string  `json:"event_type"`
+	ChildOrderType         string  `json:"child_order_type"`
+	ExpireDate             string  `json:"expire_date"`
+	Reason                 string  `json:"reason"`
+	ExecId                 int     `json:"exec_id"`
+	Side                   string  `json:"side"`
+	Price                  int     `json:"price"`
+	Size                   float64 `json:"size"`
+	Commission             float64 `json:"commission"`
+	Sfd                    float64 `json:"sfd"`
+}
+
+// Event of parent order happened.
+type ParentOrderEvent struct {
+	ProductCode             string  `json:"product_code"`
+	ParentOrderId           string  `json:"parent_order_id"`
+	ParentOrderAcceptanceId string  `json:"parent_order_acceptance_id"`
+	EventDate               string  `json:"event_date"`
+	EventType               string  `json:"event_type"`
+	ParentOrderType         string  `json:"parent_order_type"`
+	Reason                  string  `json:"reason"`
+	ChildOrderType          string  `json:"child_order_type"`
+	ParameterIndex          int     `json:"reason"`
+	ChildOrderAcceptanceId  string  `json:"child_order_acceptance_id"`
+	Side                    string  `json:"side"`
+	Price                   int     `json:"price"`
+	Size                    float64 `json:"size"`
+	ExpireDate              string  `json:"expire_date"`
 }
 
 func (bf *WebSocketClient) Connect() error {
@@ -44,24 +94,59 @@ func (bf *WebSocketClient) Connect() error {
 	return nil
 }
 
-// Tickerチャンネルの購読を開始します。
+// Authenticate for subscribing private channel.
+func (bf *WebSocketClient) Auth(apiKey string, apiSecret string) error {
+
+	// create message
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	nonce, err := randomHex(16)
+	if err != nil {
+		return err
+	}
+	message := strconv.FormatInt(timestamp, 10) + nonce
+
+	// signed message
+	jsonRpc := &JsonRPC2{
+		Version: "2.0",
+		Method:  "auth",
+		Params: AuthParams{
+			ApiKey:    apiKey,
+			Timestamp: timestamp,
+			Nonce:     nonce,
+			Signature: sign(message, apiSecret),
+		},
+		Id: authJsonRpcId,
+	}
+
+	// send
+	if err := bf.Con.WriteJSON(&jsonRpc); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (bf *WebSocketClient) SubscribeTicker(symbol string) {
 	bf.subscribe(channelTicker + symbol)
 }
 
-// 約定履歴チャンネルの購読を開始します。
 func (bf *WebSocketClient) SubscribeExecutions(symbol string) {
 	bf.subscribe(channelExecutions + symbol)
 }
 
-// 板チャンネルの購読を開始します。
 func (bf *WebSocketClient) SubscribeBoard(symbol string) {
 	bf.subscribe(channelBoard + symbol)
 }
 
-// 板（スナップショット）チャンネルの購読を開始します。
 func (bf *WebSocketClient) SubscribeBoardSnapshot(symbol string) {
 	bf.subscribe(channelBoardSnapshot + symbol)
+}
+
+func (bf *WebSocketClient) SubscribeChildOrder() {
+	bf.subscribe(channelChildOrder)
+}
+
+func (bf *WebSocketClient) SubscribeParentOrder() {
+	bf.subscribe(channelParentOrder)
 }
 
 func (bf *WebSocketClient) UnsubscribeTicker(symbol string) {
@@ -78,6 +163,14 @@ func (bf *WebSocketClient) UnsubscribeBoard(symbol string) {
 
 func (bf *WebSocketClient) UnsubscribeBoardSnapshot(symbol string) {
 	bf.unsubscribe(channelBoardSnapshot + symbol)
+}
+
+func (bf *WebSocketClient) UnsubscribeChildOrder() {
+	bf.unsubscribe(channelChildOrder)
+}
+
+func (bf *WebSocketClient) UnsubscribeParentOrder() {
+	bf.unsubscribe(channelParentOrder)
 }
 
 func (bf WebSocketClient) subscribe(channel string) {
@@ -109,93 +202,131 @@ func (bf *WebSocketClient) Receive(
 	brdCh chan<- Board,
 	excCh chan<- []Execution,
 	tkrCh chan<- Ticker,
+	chOrdCh chan<- []ChildOrderEvent,
+	prOrdCh chan<- Ticker,
 	errCh chan<- error) {
 
 	defer close(brdSnpCh)
 	defer close(brdCh)
 	defer close(excCh)
 	defer close(tkrCh)
+	defer close(chOrdCh)
+	defer close(prOrdCh)
 	defer close(errCh)
 
 	for {
 
-		// websocketでメッセージを受信する
-		res := new(JsonRPC2)
-		if err := bf.Con.ReadJSON(res); err != nil {
+		var res map[string]interface{}
+		if err := bf.Con.ReadJSON(&res); err != nil {
 			log.Println("Received error:", err)
 			errCh <- err
 			return
 		}
+		if bf.Debug {
+			log.Println("Received data:", res)
+		}
 
-		// メッセージの種類に応じてチャンネルに送信
-		if res.Method == "channelMessage" {
+		if method, ok := res["method"]; ok {
+			if method == "channelMessage" {
+				p := res["params"].(map[string]interface{})
+				ch := p["channel"].(string)
 
-			//start := time.Now()
-			p := res.Params.(map[string]interface{})
-			ch := p["channel"].(string)
+				if strings.HasPrefix(ch, channelExecutions) {
 
-			if strings.HasPrefix(ch, channelExecutions) {
+					message := p["message"].([]interface{})
+					var executions []Execution
+					for _, m := range message {
+						e := m.(map[string]interface{})
+						execDate, err := time.Parse(time.RFC3339Nano, e["exec_date"].(string))
+						if err != nil {
+							errCh <- err
+						}
+						execution := Execution{
+							Id:                         int64(e["id"].(float64)),
+							ExecDate:                   execDate,
+							Price:                      e["price"].(float64),
+							Size:                       e["size"].(float64),
+							Side:                       e["side"].(string),
+							BuyChildOrderAcceptanceId:  e["buy_child_order_acceptance_id"].(string),
+							SellChildOrderAcceptanceId: e["sell_child_order_acceptance_id"].(string),
+							Delay:                      time.Now().Sub(execDate),
+						}
+						executions = append(executions, execution)
+					}
+					excCh <- executions
 
-				// 約定履歴
-				message := p["message"].([]interface{})
-				var executions []Execution
-				for _, m := range message {
-					e := m.(map[string]interface{})
-					execDate, err := time.Parse(time.RFC3339Nano, e["exec_date"].(string))
+				} else if strings.HasPrefix(ch, channelBoardSnapshot) {
+					brdSnpCh <- newBoard(p["message"].(map[string]interface{}))
+
+				} else if strings.HasPrefix(ch, channelBoard) {
+					brdCh <- newBoard(p["message"].(map[string]interface{}))
+
+				} else if strings.HasPrefix(ch, channelTicker) {
+
+					t := p["message"].(interface{}).(map[string]interface{})
+					timestamp, err := time.Parse(time.RFC3339Nano, t["timestamp"].(string))
 					if err != nil {
 						errCh <- err
 					}
-					execution := Execution{
-						Id:                         int64(e["id"].(float64)),
-						ExecDate:                   execDate,
-						Price:                      e["price"].(float64),
-						Size:                       e["size"].(float64),
-						Side:                       e["side"].(string),
-						BuyChildOrderAcceptanceId:  e["buy_child_order_acceptance_id"].(string),
-						SellChildOrderAcceptanceId: e["sell_child_order_acceptance_id"].(string),
-						Delay:                      time.Now().Sub(execDate),
+					ticker := Ticker{
+						ProductCode:     t["product_code"].(string),
+						Timestamp:       TickerTime{&timestamp},
+						TickId:          int64(t["tick_id"].(float64)),
+						BestBid:         t["best_bid"].(float64),
+						BestAsk:         t["best_ask"].(float64),
+						BestBidSize:     t["best_bid_size"].(float64),
+						BestAskSize:     t["best_ask_size"].(float64),
+						TotalBidDepth:   t["total_bid_depth"].(float64),
+						TotalAskDepth:   t["total_ask_depth"].(float64),
+						Ltp:             t["ltp"].(float64),
+						Volume:          t["volume"].(float64),
+						VolumeByProduct: t["volume_by_product"].(float64),
 					}
-					executions = append(executions, execution)
+					tkrCh <- ticker
+
+				} else if strings.HasPrefix(ch, channelChildOrder) {
+
+					var events []ChildOrderEvent
+					msg := p["message"].(interface{}).([]interface{})
+					msgJson, err := json.Marshal(&msg)
+					if err != nil {
+						errCh <- err
+					}
+					err = json.Unmarshal(msgJson, &events)
+					if err != nil {
+						errCh <- err
+					}
+					chOrdCh <- events
+
+				} else if strings.HasPrefix(ch, channelParentOrder) {
+
+					var events []ParentOrderEvent
+					msg := p["message"].(interface{}).([]interface{})
+					msgJson, err := json.Marshal(&msg)
+					if err != nil {
+						errCh <- err
+					}
+					err = json.Unmarshal(msgJson, &events)
+					if err != nil {
+						errCh <- err
+					}
+					log.Println(events)
 				}
-				excCh <- executions
-
-			} else if strings.HasPrefix(ch, channelBoardSnapshot) {
-
-				// 板（スナップショット）
-				brdSnpCh <- newBoard(p["message"].(map[string]interface{}))
-
-			} else if strings.HasPrefix(ch, channelBoard) {
-
-				// 板
-				brdCh <- newBoard(p["message"].(map[string]interface{}))
-
-			} else if strings.HasPrefix(ch, channelTicker) {
-
-				// Ticker
-				t := p["message"].(interface{}).(map[string]interface{})
-				timestamp, err := time.Parse(time.RFC3339Nano, t["timestamp"].(string))
-				if err != nil {
-					errCh <- err
-				}
-				ticker := Ticker{
-					ProductCode:     t["product_code"].(string),
-					Timestamp:       TickerTime{&timestamp},
-					TickId:          int64(t["tick_id"].(float64)),
-					BestBid:         t["best_bid"].(float64),
-					BestAsk:         t["best_ask"].(float64),
-					BestBidSize:     t["best_bid_size"].(float64),
-					BestAskSize:     t["best_ask_size"].(float64),
-					TotalBidDepth:   t["total_bid_depth"].(float64),
-					TotalAskDepth:   t["total_ask_depth"].(float64),
-					Ltp:             t["ltp"].(float64),
-					Volume:          t["volume"].(float64),
-					VolumeByProduct: t["volume_by_product"].(float64),
-				}
-				tkrCh <- ticker
 			}
 
-			// 処理時間
-			//fmt.Println("channel:", ch, "time:", time.Now().Sub(start))
+		} else if id, ok := res["id"]; ok {
+
+			// if res has id and id equals authJsonRpcId, it's a response of request authentication
+			if id.(float64) == authJsonRpcId {
+				if result, ok := res["result"]; ok {
+					if result.(bool) {
+						log.Println("Succeeded to authenticate.")
+						bf.SubscribeChildOrder()
+					} else {
+						log.Println("Failed to authenticate.")
+					}
+				}
+			}
 		}
 	}
 	log.Println("Finished receive websocket.")
@@ -224,4 +355,12 @@ func newBoard(message map[string]interface{}) Board {
 		Bids:     bids,
 		Asks:     asks,
 	}
+}
+
+func randomHex(n int) (string, error) {
+	bytes := make([]byte, n)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }
