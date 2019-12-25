@@ -91,7 +91,7 @@ func (tt *ExpireTime) UnmarshalJSON(data []byte) error {
 func (t *ChildOrderEvent) String() string {
 	tp := reflect.TypeOf(t)
 	return fmt.Sprintf(
-		"ChildOrderEvent[%s=%s, %s=%s, %s=%s, %s=%v, %s=%s, %s=%s, %s=%v, %s=%v, %s=%s, %s=%v, %s=%v, %s=%v, %s=%v]",
+		"ChildOrderEvent[%s=%s, %s=%s, %s=%s, %s=%v, %s=%s, %s=%s, %s=%v, %s=%v, %s=%v, %s=%v, %s=%v, %s=%v, %s=%v]",
 		tp.Field(0).Tag.Get("json"), t.ProductCode,
 		tp.Field(1).Tag.Get("json"), t.ChildOrderId,
 		tp.Field(2).Tag.Get("json"), t.ChildOrderAcceptanceId,
