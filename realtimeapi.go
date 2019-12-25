@@ -2,6 +2,7 @@ package bitflyergo
 
 import (
 	"encoding/hex"
+	"fmt"
 	"log"
 	url2 "net/url"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 
 	"crypto/rand"
 	"encoding/json"
+	"reflect"
 
 	"github.com/gorilla/websocket"
 )
@@ -50,38 +52,78 @@ type WebSocketClient struct {
 
 // Event of child order happened.
 type ChildOrderEvent struct {
-	ProductCode            string  `json:"product_code"`
-	ChildOrderId           string  `json:"child_order_id"`
-	ChildOrderAcceptanceId string  `json:"child_order_acceptance_id"`
-	EventDate              string  `json:"event_date"`
-	EventType              string  `json:"event_type"`
-	ChildOrderType         string  `json:"child_order_type"`
-	ExpireDate             string  `json:"expire_date"`
-	Reason                 string  `json:"reason"`
-	ExecId                 int     `json:"exec_id"`
-	Side                   string  `json:"side"`
-	Price                  int     `json:"price"`
-	Size                   float64 `json:"size"`
-	Commission             float64 `json:"commission"`
-	Sfd                    float64 `json:"sfd"`
+	ProductCode            string     `json:"product_code"`
+	ChildOrderId           string     `json:"child_order_id"`
+	ChildOrderAcceptanceId string     `json:"child_order_acceptance_id"`
+	EventDate              EventTime  `json:"event_date"`
+	EventType              string     `json:"event_type"`
+	ChildOrderType         string     `json:"child_order_type"`
+	ExpireDate             ExpireTime `json:"expire_date"`
+	Reason                 string     `json:"reason"`
+	ExecId                 int        `json:"exec_id"`
+	Side                   string     `json:"side"`
+	Price                  int        `json:"price"`
+	Size                   float64    `json:"size"`
+	Commission             float64    `json:"commission"`
+	Sfd                    float64    `json:"sfd"`
+}
+
+type EventTime struct {
+	*time.Time
+}
+
+func (tt *EventTime) UnmarshalJSON(data []byte) error {
+	t, err := time.Parse("\"2006-01-02T15:04:05.0000000Z\"", string(data))
+	*tt = EventTime{&t}
+	return err
+}
+
+type ExpireTime struct {
+	*time.Time
+}
+
+func (tt *ExpireTime) UnmarshalJSON(data []byte) error {
+	t, err := time.Parse("\"2006-01-02T15:04:05\"", string(data))
+	*tt = ExpireTime{&t}
+	return err
+}
+
+func (t *ChildOrderEvent) String() string {
+	tp := reflect.TypeOf(t)
+	return fmt.Sprintf(
+		"ChildOrderEvent[%s=%s, %s=%s, %s=%s, %s=%v, %s=%s, %s=%s, %s=%v, %s=%v, %s=%s, %s=%v, %s=%v, %s=%v, %s=%v]",
+		tp.Field(0).Tag.Get("json"), t.ProductCode,
+		tp.Field(1).Tag.Get("json"), t.ChildOrderId,
+		tp.Field(2).Tag.Get("json"), t.ChildOrderAcceptanceId,
+		tp.Field(3).Tag.Get("json"), t.EventDate,
+		tp.Field(4).Tag.Get("json"), t.EventType,
+		tp.Field(5).Tag.Get("json"), t.ChildOrderType,
+		tp.Field(6).Tag.Get("json"), t.ExpireDate,
+		tp.Field(7).Tag.Get("json"), t.Reason,
+		tp.Field(8).Tag.Get("json"), t.ExecId,
+		tp.Field(9).Tag.Get("json"), t.Side,
+		tp.Field(10).Tag.Get("json"), t.Price,
+		tp.Field(11).Tag.Get("json"), t.Size,
+		tp.Field(12).Tag.Get("json"), t.Commission,
+		tp.Field(13).Tag.Get("json"), t.Sfd)
 }
 
 // Event of parent order happened.
 type ParentOrderEvent struct {
-	ProductCode             string  `json:"product_code"`
-	ParentOrderId           string  `json:"parent_order_id"`
-	ParentOrderAcceptanceId string  `json:"parent_order_acceptance_id"`
-	EventDate               string  `json:"event_date"`
-	EventType               string  `json:"event_type"`
-	ParentOrderType         string  `json:"parent_order_type"`
-	Reason                  string  `json:"reason"`
-	ChildOrderType          string  `json:"child_order_type"`
-	ParameterIndex          int     `json:"reason"`
-	ChildOrderAcceptanceId  string  `json:"child_order_acceptance_id"`
-	Side                    string  `json:"side"`
-	Price                   int     `json:"price"`
-	Size                    float64 `json:"size"`
-	ExpireDate              string  `json:"expire_date"`
+	ProductCode             string     `json:"product_code"`
+	ParentOrderId           string     `json:"parent_order_id"`
+	ParentOrderAcceptanceId string     `json:"parent_order_acceptance_id"`
+	EventDate               EventTime  `json:"event_date"`
+	EventType               string     `json:"event_type"`
+	ParentOrderType         string     `json:"parent_order_type"`
+	Reason                  string     `json:"reason"`
+	ChildOrderType          string     `json:"child_order_type"`
+	ParameterIndex          int        `json:"parameter_index"`
+	ChildOrderAcceptanceId  string     `json:"child_order_acceptance_id"`
+	Side                    string     `json:"side"`
+	Price                   int        `json:"price"`
+	Size                    float64    `json:"size"`
+	ExpireDate              ExpireTime `json:"expire_date"`
 }
 
 func (bf *WebSocketClient) Connect() error {
