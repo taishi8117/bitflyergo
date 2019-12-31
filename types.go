@@ -7,6 +7,16 @@ import (
 	"time"
 )
 
+type TimeWithSecond struct {
+	*time.Time
+}
+
+func (tt *TimeWithSecond) UnmarshalJSON(data []byte) error {
+	t, err := time.Parse("\"2006-01-02T15:04:05\"", string(data))
+	*tt = TimeWithSecond{&t}
+	return err
+}
+
 type Bitflyer struct {
 	BaseUrl       string
 	ApiVersion    string
@@ -125,47 +135,37 @@ type Balance struct {
 }
 
 type ChildOrder struct {
-	Id                     int64     `json:"id"`
-	ChildOrderId           string    `json:"child_order_id"`
-	ProductCode            string    `json:"product_code"`
-	Side                   string    `json:"side"`
-	ChildOrderType         string    `json:"child_order_type"`
-	Price                  float64   `json:"price"`
-	AveragePrice           float64   `json:"average_price"`
-	Size                   float64   `json:"size"`
-	ChildOrderState        string    `json:"child_order_state"`
-	ExpireDate             OrderTime `json:"expire_date"`
-	ChildOrderDate         OrderTime `json:"child_order_date"`
-	ChildOrderAcceptanceId string    `json:"child_order_acceptance_id"`
-	OutstandingSize        float64   `json:"outstanding_size"`
-	CancelSize             float64   `json:"cancel_size"`
-	ExecutedSize           float64   `json:"executed_size"`
-	TotalCommission        float64   `json:"total_commission"`
+	Id                     int64          `json:"id"`
+	ChildOrderId           string         `json:"child_order_id"`
+	ProductCode            string         `json:"product_code"`
+	Side                   string         `json:"side"`
+	ChildOrderType         string         `json:"child_order_type"`
+	Price                  float64        `json:"price"`
+	AveragePrice           float64        `json:"average_price"`
+	Size                   float64        `json:"size"`
+	ChildOrderState        string         `json:"child_order_state"`
+	ExpireDate             TimeWithSecond `json:"expire_date"`
+	ChildOrderDate         TimeWithSecond ` json:"child_order_date"`
+	ChildOrderAcceptanceId string         `json:"child_order_acceptance_id"`
+	OutstandingSize        float64        `json:"outstanding_size"`
+	CancelSize             float64        `json:"cancel_size"`
+	ExecutedSize           float64        `json:"executed_size"`
+	TotalCommission        float64        `json:"total_commission"`
 	Executions             []MyExecution
 }
 
-type OrderTime struct {
-	*time.Time
-}
-
-func (ot *OrderTime) UnmarshalJSON(data []byte) error {
-	t, err := time.Parse("\"2006-01-02T15:04:05\"", string(data))
-	*ot = OrderTime{&t}
-	return err
-}
-
 type Position struct {
-	ProductCode         string    `json:"product_code"`
-	Side                string    `json:"side"`
-	Price               float64   `json:"price"`
-	Size                float64   `json:"size"`
-	Commission          float64   `json:"commission"`
-	SwapPointAccumulate float64   `json:"swap_point_accumulate"`
-	RequireCollateral   float64   `json:"require_collateral"`
-	OpenDate            OrderTime `json:"open_date"`
-	Leverage            float64   `json:"leverage"`
-	Pnl                 float64   `json:"pnl"`
-	Std                 float64   `json:"sfd"`
+	ProductCode         string         `json:"product_code"`
+	Side                string         `json:"side"`
+	Price               float64        `json:"price"`
+	Size                float64        `json:"size"`
+	Commission          float64        `json:"commission"`
+	SwapPointAccumulate float64        `json:"swap_point_accumulate"`
+	RequireCollateral   float64        `json:"require_collateral"`
+	OpenDate            TimeWithSecond `json:"open_date"`
+	Leverage            float64        `json:"leverage"`
+	Pnl                 float64        `json:"pnl"`
+	Std                 float64        `json:"sfd"`
 }
 
 type OHLC struct {

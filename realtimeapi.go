@@ -52,20 +52,20 @@ type WebSocketClient struct {
 
 // Event of child order happened.
 type ChildOrderEvent struct {
-	ProductCode            string     `json:"product_code"`
-	ChildOrderId           string     `json:"child_order_id"`
-	ChildOrderAcceptanceId string     `json:"child_order_acceptance_id"`
-	EventDate              EventTime  `json:"event_date"`
-	EventType              string     `json:"event_type"`
-	ChildOrderType         string     `json:"child_order_type"`
-	ExpireDate             ExpireTime `json:"expire_date"`
-	Reason                 string     `json:"reason"`
-	ExecId                 int        `json:"exec_id"`
-	Side                   string     `json:"side"`
-	Price                  int        `json:"price"`
-	Size                   float64    `json:"size"`
-	Commission             float64    `json:"commission"`
-	Sfd                    float64    `json:"sfd"`
+	ProductCode            string         `json:"product_code"`
+	ChildOrderId           string         `json:"child_order_id"`
+	ChildOrderAcceptanceId string         `json:"child_order_acceptance_id"`
+	EventDate              EventTime      `json:"event_date"`
+	EventType              string         `json:"event_type"`
+	ChildOrderType         string         `json:"child_order_type"`
+	ExpireDate             TimeWithSecond `json:"expire_date"`
+	Reason                 string         `json:"reason"`
+	ExecId                 int            `json:"exec_id"`
+	Side                   string         `json:"side"`
+	Price                  int            `json:"price"`
+	Size                   float64        `json:"size"`
+	Commission             float64        `json:"commission"`
+	Sfd                    float64        `json:"sfd"`
 }
 
 type EventTime struct {
@@ -75,16 +75,6 @@ type EventTime struct {
 func (tt *EventTime) UnmarshalJSON(data []byte) error {
 	t, err := time.Parse("\"2006-01-02T15:04:05.0000000Z\"", string(data))
 	*tt = EventTime{&t}
-	return err
-}
-
-type ExpireTime struct {
-	*time.Time
-}
-
-func (tt *ExpireTime) UnmarshalJSON(data []byte) error {
-	t, err := time.Parse("\"2006-01-02T15:04:05\"", string(data))
-	*tt = ExpireTime{&t}
 	return err
 }
 
@@ -110,20 +100,20 @@ func (t *ChildOrderEvent) String() string {
 
 // Event of parent order happened.
 type ParentOrderEvent struct {
-	ProductCode             string     `json:"product_code"`
-	ParentOrderId           string     `json:"parent_order_id"`
-	ParentOrderAcceptanceId string     `json:"parent_order_acceptance_id"`
-	EventDate               EventTime  `json:"event_date"`
-	EventType               string     `json:"event_type"`
-	ParentOrderType         string     `json:"parent_order_type"`
-	Reason                  string     `json:"reason"`
-	ChildOrderType          string     `json:"child_order_type"`
-	ParameterIndex          int        `json:"parameter_index"`
-	ChildOrderAcceptanceId  string     `json:"child_order_acceptance_id"`
-	Side                    string     `json:"side"`
-	Price                   int        `json:"price"`
-	Size                    float64    `json:"size"`
-	ExpireDate              ExpireTime `json:"expire_date"`
+	ProductCode             string         `json:"product_code"`
+	ParentOrderId           string         `json:"parent_order_id"`
+	ParentOrderAcceptanceId string         `json:"parent_order_acceptance_id"`
+	EventDate               EventTime      `json:"event_date"`
+	EventType               string         `json:"event_type"`
+	ParentOrderType         string         `json:"parent_order_type"`
+	Reason                  string         `json:"reason"`
+	ChildOrderType          string         `json:"child_order_type"`
+	ParameterIndex          int            `json:"parameter_index"`
+	ChildOrderAcceptanceId  string         `json:"child_order_acceptance_id"`
+	Side                    string         `json:"side"`
+	Price                   int            `json:"price"`
+	Size                    float64        `json:"size"`
+	ExpireDate              TimeWithSecond `json:"expire_date"`
 }
 
 func (bf *WebSocketClient) Connect() error {
