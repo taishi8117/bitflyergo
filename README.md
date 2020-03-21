@@ -86,3 +86,20 @@ Place the market order. market order does't need to specify price of argument.
 ```go
 childOrderAcceptanceId, err := api.SendChildOrder("FX_BTC_JPY", "MARKET", "BUY", 0.01, nil)
 ```
+
+## Test
+
+Tests using private api require following environment variables.
+
+|Name|Value|
+|---|---|
+|APIKEY|Your API Key|
+|APISECRET|Your API Secret|
+
+APIKEY and APISECRET need following permission.
+
+* Collateral
+    * READ
+* Order
+    * READ
+
