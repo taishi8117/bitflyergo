@@ -106,7 +106,7 @@ type TickerTime struct {
 }
 
 func (tt *TickerTime) UnmarshalJSON(data []byte) error {
-	t, err := time.Parse("\"2006-01-02T15:04:05.999\"", string(data))
+	t, err := time.Parse("2006-01-02T15:04:05.9", string(data))
 	*tt = TickerTime{&t}
 	return err
 }

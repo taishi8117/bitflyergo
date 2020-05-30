@@ -73,7 +73,7 @@ type EventTime struct {
 }
 
 func (tt *EventTime) UnmarshalJSON(data []byte) error {
-	t, err := time.Parse("\"2006-01-02T15:04:05.0000000Z\"", string(data))
+	t, err := time.Parse("2006-01-02T15:04:05.9Z", string(data))
 	*tt = EventTime{&t}
 	return err
 }

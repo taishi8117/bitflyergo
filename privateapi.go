@@ -2,6 +2,8 @@ package bitflyergo
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -84,6 +86,11 @@ func (bf *Bitflyer) GetBalance() (*[]Balance, error) {
 
 func (bf *Bitflyer) SendChildOrder(productCode string, childOrderType string,
 	side string, size float64, params map[string]string) (map[string]string, error) {
+
+	if size < MinimumOrderbleSize {
+		return nil, errors.New(fmt.Sprintf(
+			"Sizes less than %v can not be ordered. [%v]\n", MinimumOrderbleSize, size))
+	}
 
 	if params == nil {
 		params = map[string]string{}
