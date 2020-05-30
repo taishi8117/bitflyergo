@@ -78,7 +78,7 @@ func CreateOHLC(executions []Execution, timeFrameSec int) ([]OHLC, error) {
 				Delay:  time.Duration(0),
 			}
 			delaySec = []time.Duration{}
-			delaySec = append(delaySec, e.Delay)
+			delaySec = append(delaySec, e.Delay())
 			nextTime = nextTime.Add(time.Duration(timeFrameSec) * time.Second)
 
 		} else {
@@ -99,7 +99,7 @@ func CreateOHLC(executions []Execution, timeFrameSec int) ([]OHLC, error) {
 			ohlc.Close = e.Price
 
 			// 遅延時間を加算
-			delaySec = append(delaySec, e.Delay)
+			delaySec = append(delaySec, e.Delay())
 		}
 	}
 

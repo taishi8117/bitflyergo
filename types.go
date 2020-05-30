@@ -30,20 +30,19 @@ type Bitflyer struct {
 }
 
 type Execution struct {
-	Id                         int64         `json:"id"`
-	ExecDate                   time.Time     `json:"exec_date"`
-	Price                      float64       `json:"price"`
-	Size                       float64       `json:"size"`
-	Side                       string        `json:"side"`
-	BuyChildOrderAcceptanceId  string        `json:"buy_child_order_acceptance_id"`
-	SellChildOrderAcceptanceId string        `json:"sell_child_order_acceptance_id"`
-	Delay                      time.Duration `json:"delay"`
-	ReceivedTime               time.Time     `json:receivedTime`
+	Id                         int64     `json:"id"`
+	ExecDate                   time.Time `json:"exec_date"`
+	Price                      float64   `json:"price"`
+	Size                       float64   `json:"size"`
+	Side                       string    `json:"side"`
+	BuyChildOrderAcceptanceId  string    `json:"buy_child_order_acceptance_id"`
+	SellChildOrderAcceptanceId string    `json:"sell_child_order_acceptance_id"`
+	ReceivedTime               time.Time `json:receivedTime`
 }
 
 // Returns receiving delayed time
 func (e *Execution) Delay() time.Duration {
-	return e.receivedTime.Sub(e.execDate)
+	return e.ReceivedTime.Sub(e.ExecDate)
 }
 
 type Board struct {
