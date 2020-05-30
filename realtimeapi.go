@@ -265,6 +265,7 @@ func (bf *WebSocketClient) Receive(
 
 				if strings.HasPrefix(ch, channelExecutions) {
 
+					receivedTime := time.Now()
 					message := p["message"].([]interface{})
 					var executions []Execution
 					for _, m := range message {
@@ -281,7 +282,7 @@ func (bf *WebSocketClient) Receive(
 							Side:                       e["side"].(string),
 							BuyChildOrderAcceptanceId:  e["buy_child_order_acceptance_id"].(string),
 							SellChildOrderAcceptanceId: e["sell_child_order_acceptance_id"].(string),
-							Delay:                      time.Now().Sub(execDate),
+							ReceivedTime:               receivedTime,
 						}
 						executions = append(executions, execution)
 					}
