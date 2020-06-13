@@ -72,6 +72,16 @@ type EventTime struct {
 	*time.Time
 }
 
+var Logger *log.Logger
+
+func logf(format string, v ...interface{}) {
+	if Logger == nil {
+		log.Printf(format, v...)
+		return
+	}
+	Logger.Printf(format, v...)
+}
+
 func (tt *EventTime) UnmarshalJSON(data []byte) error {
 	t, err := time.Parse("2006-01-02T15:04:05.9Z", string(data))
 	*tt = EventTime{&t}
@@ -272,6 +282,7 @@ func (bf *WebSocketClient) Receive(
 						e := m.(map[string]interface{})
 						execDate, err := time.Parse(time.RFC3339Nano, e["exec_date"].(string))
 						if err != nil {
+							logf("Failed to parse time received from executions channel: %s", e["exec_date"].(string))
 							errCh <- err
 						}
 						execution := Execution{
@@ -299,6 +310,7 @@ func (bf *WebSocketClient) Receive(
 					t := p["message"].(interface{}).(map[string]interface{})
 					timestamp, err := time.Parse(time.RFC3339Nano, t["timestamp"].(string))
 					if err != nil {
+						logf("Failed to parse time received from ticker channel: %s", t["timestamp"].(string))
 						errCh <- err
 					}
 					ticker := Ticker{
@@ -327,6 +339,7 @@ func (bf *WebSocketClient) Receive(
 					}
 					err = json.Unmarshal(msgJson, &events)
 					if err != nil {
+						logf("Failed to parse ChildOrderEvent: %v", msgJson)
 						errCh <- err
 					}
 					chOrdCh <- events
@@ -341,6 +354,7 @@ func (bf *WebSocketClient) Receive(
 					}
 					err = json.Unmarshal(msgJson, &events)
 					if err != nil {
+						logf("Failed to parse ParentOrderEvent: %v", msgJson)
 						errCh <- err
 					}
 					log.Println(events)
