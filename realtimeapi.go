@@ -83,7 +83,7 @@ func logf(format string, v ...interface{}) {
 }
 
 func (tt *EventTime) UnmarshalJSON(data []byte) error {
-	t, err := time.Parse("2006-01-02T15:04:05.9Z", string(data))
+	t, err := time.Parse("\"2006-01-02T15:04:05.9Z\"", string(data))
 	*tt = EventTime{&t}
 	return err
 }
@@ -339,7 +339,7 @@ func (bf *WebSocketClient) Receive(
 					}
 					err = json.Unmarshal(msgJson, &events)
 					if err != nil {
-						logf("Failed to parse ChildOrderEvent: %v", msgJson)
+						logf("Failed to parse ChildOrderEvent: %v", string(msgJson))
 						errCh <- err
 					}
 					chOrdCh <- events
@@ -354,7 +354,7 @@ func (bf *WebSocketClient) Receive(
 					}
 					err = json.Unmarshal(msgJson, &events)
 					if err != nil {
-						logf("Failed to parse ParentOrderEvent: %v", msgJson)
+						logf("Failed to parse ParentOrderEvent: %v", string(msgJson))
 						errCh <- err
 					}
 					log.Println(events)
