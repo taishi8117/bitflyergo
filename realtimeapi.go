@@ -354,7 +354,7 @@ func (bf *WebSocketClient) Receive(
 						errCh <- err
 					}
 					//chOrdCh <- events
-					OnReceiveChildOrderEvents(events)
+					bf.Cb.OnReceiveChildOrderEvents(events)
 
 				} else if strings.HasPrefix(ch, channelParentOrder) {
 
