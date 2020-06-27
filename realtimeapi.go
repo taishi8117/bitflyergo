@@ -48,6 +48,12 @@ type JsonRPC2 struct {
 type WebSocketClient struct {
 	Con   *websocket.Conn
 	Debug bool
+	Cb    Callback
+}
+
+type Callback interface {
+	OnReceiveBoard(board Board)
+	OnReceiveBoardSnapshot(board Board)
 }
 
 // Event of child order happened.
@@ -240,16 +246,16 @@ func (bf WebSocketClient) writeJson(channel string, method string) error {
 }
 
 func (bf *WebSocketClient) Receive(
-	brdSnpCh chan<- Board,
-	brdCh chan<- Board,
+	//brdSnpCh chan<- Board,
+	//brdCh chan<- Board,
 	excCh chan<- []Execution,
 	tkrCh chan<- Ticker,
 	chOrdCh chan<- []ChildOrderEvent,
 	prOrdCh chan<- Ticker,
 	errCh chan<- error) {
 
-	defer close(brdSnpCh)
-	defer close(brdCh)
+	//defer close(brdSnpCh)
+	//defer close(brdCh)
 	defer close(excCh)
 	defer close(tkrCh)
 	defer close(chOrdCh)
@@ -300,10 +306,12 @@ func (bf *WebSocketClient) Receive(
 					excCh <- executions
 
 				} else if strings.HasPrefix(ch, channelBoardSnapshot) {
-					brdSnpCh <- newBoard(p["message"].(map[string]interface{}))
+					bf.Cb.OnReceiveBoardSnapshot(newBoard(p["message"].(map[string]interface{})))
+					//brdSnpCh <- newBoard(p["message"].(map[string]interface{}))
 
 				} else if strings.HasPrefix(ch, channelBoard) {
-					brdCh <- newBoard(p["message"].(map[string]interface{}))
+					bf.Cb.OnReceiveBoard(newBoard(p["message"].(map[string]interface{})))
+					//brdCh <- newBoard(p["message"].(map[string]interface{}))
 
 				} else if strings.HasPrefix(ch, channelTicker) {
 
