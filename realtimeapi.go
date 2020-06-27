@@ -54,6 +54,7 @@ type WebSocketClient struct {
 type Callback interface {
 	OnReceiveBoard(board *Board)
 	OnReceiveBoardSnapshot(board *Board)
+	OnReceiveExecutions(executions []Execution)
 }
 
 // Event of child order happened.
@@ -248,7 +249,7 @@ func (bf WebSocketClient) writeJson(channel string, method string) error {
 func (bf *WebSocketClient) Receive(
 	//brdSnpCh chan<- Board,
 	//brdCh chan<- Board,
-	excCh chan<- []Execution,
+	//excCh chan<- []Execution,
 	tkrCh chan<- Ticker,
 	chOrdCh chan<- []ChildOrderEvent,
 	prOrdCh chan<- Ticker,
@@ -256,7 +257,7 @@ func (bf *WebSocketClient) Receive(
 
 	//defer close(brdSnpCh)
 	//defer close(brdCh)
-	defer close(excCh)
+	//defer close(excCh)
 	defer close(tkrCh)
 	defer close(chOrdCh)
 	defer close(prOrdCh)
@@ -303,7 +304,8 @@ func (bf *WebSocketClient) Receive(
 						}
 						executions = append(executions, execution)
 					}
-					excCh <- executions
+					//excCh <- executions
+					bf.Cb.OnReceiveExecutions(executions)
 
 				} else if strings.HasPrefix(ch, channelBoardSnapshot) {
 					bf.Cb.OnReceiveBoardSnapshot(newBoard(p["message"].(map[string]interface{})))
