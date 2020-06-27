@@ -306,11 +306,11 @@ func (bf *WebSocketClient) Receive(
 					excCh <- executions
 
 				} else if strings.HasPrefix(ch, channelBoardSnapshot) {
-					bf.Cb.OnReceiveBoardSnapshot(&newBoard(p["message"].(map[string]interface{})))
+					bf.Cb.OnReceiveBoardSnapshot(newBoard(p["message"].(map[string]interface{})))
 					//brdSnpCh <- newBoard(p["message"].(map[string]interface{}))
 
 				} else if strings.HasPrefix(ch, channelBoard) {
-					bf.Cb.OnReceiveBoard(&newBoard(p["message"].(map[string]interface{})))
+					bf.Cb.OnReceiveBoard(newBoard(p["message"].(map[string]interface{})))
 					//brdCh <- newBoard(p["message"].(map[string]interface{}))
 
 				} else if strings.HasPrefix(ch, channelTicker) {
@@ -387,7 +387,7 @@ func (bf *WebSocketClient) Receive(
 	log.Println("Finished receive websocket.")
 }
 
-func newBoard(message map[string]interface{}) Board {
+func newBoard(message map[string]interface{}) *Board {
 
 	bidsMessage := message["bids"].([]interface{})
 	var bids = make(map[float64]float64, len(bidsMessage))
@@ -404,7 +404,7 @@ func newBoard(message map[string]interface{}) Board {
 		asks[a["price"].(float64)] = a["size"].(float64)
 	}
 
-	return Board{
+	return &Board{
 		Time:     time.Now(),
 		MidPrice: message["mid_price"].(float64),
 		Bids:     bids,
