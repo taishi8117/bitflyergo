@@ -55,6 +55,7 @@ type Callback interface {
 	OnReceiveBoard(board *Board)
 	OnReceiveBoardSnapshot(board *Board)
 	OnReceiveExecutions(executions []Execution)
+	OnReceiveChildOrderEvents(event []ChildOrderEvent)
 }
 
 // Event of child order happened.
@@ -251,7 +252,7 @@ func (bf *WebSocketClient) Receive(
 	//brdCh chan<- Board,
 	//excCh chan<- []Execution,
 	tkrCh chan<- Ticker,
-	chOrdCh chan<- []ChildOrderEvent,
+	//chOrdCh chan<- []ChildOrderEvent,
 	prOrdCh chan<- Ticker,
 	errCh chan<- error) {
 
@@ -259,7 +260,7 @@ func (bf *WebSocketClient) Receive(
 	//defer close(brdCh)
 	//defer close(excCh)
 	defer close(tkrCh)
-	defer close(chOrdCh)
+	//defer close(chOrdCh)
 	defer close(prOrdCh)
 	defer close(errCh)
 
@@ -352,7 +353,8 @@ func (bf *WebSocketClient) Receive(
 						logf("Failed to parse ChildOrderEvent: %v", string(msgJson))
 						errCh <- err
 					}
-					chOrdCh <- events
+					//chOrdCh <- events
+					OnReceiveChildOrderEvents(events)
 
 				} else if strings.HasPrefix(ch, channelParentOrder) {
 
