@@ -52,8 +52,8 @@ type WebSocketClient struct {
 }
 
 type Callback interface {
-	OnReceiveBoard(board Board)
-	OnReceiveBoardSnapshot(board Board)
+	OnReceiveBoard(board *Board)
+	OnReceiveBoardSnapshot(board *Board)
 }
 
 // Event of child order happened.
@@ -306,11 +306,11 @@ func (bf *WebSocketClient) Receive(
 					excCh <- executions
 
 				} else if strings.HasPrefix(ch, channelBoardSnapshot) {
-					bf.Cb.OnReceiveBoardSnapshot(newBoard(p["message"].(map[string]interface{})))
+					bf.Cb.OnReceiveBoardSnapshot(&newBoard(p["message"].(map[string]interface{})))
 					//brdSnpCh <- newBoard(p["message"].(map[string]interface{}))
 
 				} else if strings.HasPrefix(ch, channelBoard) {
-					bf.Cb.OnReceiveBoard(newBoard(p["message"].(map[string]interface{})))
+					bf.Cb.OnReceiveBoard(&newBoard(p["message"].(map[string]interface{})))
 					//brdCh <- newBoard(p["message"].(map[string]interface{}))
 
 				} else if strings.HasPrefix(ch, channelTicker) {
