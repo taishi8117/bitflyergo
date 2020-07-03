@@ -1,7 +1,7 @@
 bitflyergo
 ===========
 
-[![CircleCI](https://circleci.com/gh/mitsutoshi/bitflyergo.svg?style=svg)](https://circleci.com/gh/mitsutoshi/bitflyergo)
+[![CircleCI](https://circleci.com/gh/mitsutoshi/bitflyergo.svg?style=svg)](https://circleci.com/gh/mitsutoshi/bitflyergo) [![Go Report Card](https://goreportcard.com/badge/github.com/mitsutoshi/bitflyergo)](https://goreportcard.com/report/github.com/mitsutoshi/bitflyergo)
 
 bitflyergo is golang library to trade cryptocurrency on bitFlyer.
 
