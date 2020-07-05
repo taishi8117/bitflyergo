@@ -12,28 +12,34 @@ import (
 	"time"
 )
 
+// Export const
 const (
-	baseUrl              = "https://api.bitflyer.com"
-	HealthNormal         = "NORMAL"
-	HealthBusy           = "BUSY"
-	HealthVeryBusy       = "VERY_BUSY"
-	HealthSuperBusy      = "SUPER_BUSY"
-	HealthNoOrder        = "NO_ORDER"
-	HealthStop           = "STOP"
-	StateRunning         = "RUNNING"
-	StateClosed          = "CLOSED"
-	StateStarting        = "STARTING"
-	StatePreopen         = "PREOPEN"
-	StateCircuitBreak    = "CIRCUIT_BREAK"
-	StateAwatingSq       = "AWAITING_SQ"
-	StateMatured         = "MATURED"
-	ChildOrderTypeLimit  = "LIMIT"
-	ChildOrderTypeMarket = "MARKET"
-	SideBuy              = "BUY"
-	SideSell             = "SELL"
-	MinimumOrderbleSize  = 0.01
+	HealthNormal         = "NORMAL"        // health: NORMAL
+	HealthBusy           = "BUSY"          // health: BUSY
+	HealthVeryBusy       = "VERY_BUSY"     // health: VERY_BUSY
+	HealthSuperBusy      = "SUPER_BUSY"    // health: SUPER_BUSY
+	HealthNoOrder        = "NO_ORDER"      // health: NO_ORDER
+	HealthStop           = "STOP"          // health: STOP
+	StateRunning         = "RUNNING"       // state: RUNNING
+	StateClosed          = "CLOSED"        // state: CLOSED
+	StateStarting        = "STARTING"      // state: STARTING
+	StatePreopen         = "PREOPEN"       // state: PREOPEN
+	StateCircuitBreak    = "CIRCUIT_BREAK" // state: CIRCUIT_BREAK
+	StateAwatingSq       = "AWAITING_SQ"   // state: AWAITING_SQ
+	StateMatured         = "MATURED"       // state: MATURED
+	ChildOrderTypeLimit  = "LIMIT"         // order type: LIMIT
+	ChildOrderTypeMarket = "MARKET"        // order type: MARKET
+	SideBuy              = "BUY"           // side: BUY
+	SideSell             = "SELL"          // side: SELL
+	MinimumOrderbleSize  = 0.01            // minimum orderable size
 )
 
+// Private const
+const (
+	baseUrl = "https://api.bitflyer.com" // url for restfull api
+)
+
+// Create new Bitflyer
 func NewBitflyer(
 	apiKey string,
 	apiSecret string,
@@ -53,6 +59,7 @@ func NewBitflyer(
 	}
 }
 
+// getUrl returns a URL to call API including path.
 func (bf *Bitflyer) getUrl(path string) string {
 	return bf.BaseUrl + "/v" + bf.ApiVersion + path
 }
@@ -89,8 +96,8 @@ func (bf *Bitflyer) callApiWithRetry(method string, path string, params map[stri
 					if e.Status == status {
 						i += 1
 						canRetry = true
-						log.Println(e)
-						log.Printf("Retry [%v/%v] %v\n", i, bf.RetryLimit, path)
+						logf("%v\n", e)
+						logf("Retry [%v/%v] %v\n", i, bf.RetryLimit, path)
 						break
 					}
 				}
@@ -99,6 +106,7 @@ func (bf *Bitflyer) callApiWithRetry(method string, path string, params map[stri
 
 		// 発生したエラーがリトライ対象のエラーでない場合
 		if !canRetry {
+			logf("this error doesn't need to retry. %v\n", err)
 			return nil, err
 		}
 
@@ -143,14 +151,14 @@ func (bf *Bitflyer) request(method string, url string, headers map[string]string
 
 	if bf.Debug {
 		dump, _ := httputil.DumpRequestOut(req, true)
-		log.Printf("%s", dump)
+		logf("%s", dump)
 	}
 
 	// send request
 	st := time.Now()
 	resp, err := bf.client.Do(req)
 	if bf.Debug {
-		log.Println(method, url, time.Now().Sub(st))
+		logf(method, url, time.Now().Sub(st))
 	}
 	if err != nil {
 		return nil, err
@@ -168,6 +176,7 @@ func (bf *Bitflyer) request(method string, url string, headers map[string]string
 		apiErr := &ApiError{}
 		err = json.Unmarshal(body, apiErr)
 		if err != nil {
+			logf("[bitflyergo] catched error of api [%v]\n", apiErr)
 			return nil, err
 		}
 		return nil, apiErr

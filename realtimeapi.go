@@ -137,6 +137,7 @@ type ParentOrderEvent struct {
 	ExpireDate              TimeWithSecond `json:"expire_date"`
 }
 
+// Connect connects to bitflyer's realtime api server.
 func (bf *WebSocketClient) Connect() error {
 	url := url2.URL{Scheme: "wss", Host: url, Path: "/json-rpc"}
 	con, _, err := websocket.DefaultDialer.Dial(url.String(), nil)
@@ -250,30 +251,14 @@ func (bf WebSocketClient) writeJson(channel string, method string) error {
 	return nil
 }
 
-func (bf *WebSocketClient) Receive(
-//brdSnpCh chan<- Board,
-//brdCh chan<- Board,
-//excCh chan<- []Execution,
-//tkrCh chan<- Ticker,
-//chOrdCh chan<- []ChildOrderEvent,
-//prOrdCh chan<- Ticker,
-//errCh chan<- error
-) {
-
-	//defer close(brdSnpCh)
-	//defer close(brdCh)
-	//defer close(excCh)
-	//defer close(tkrCh)
-	//defer close(chOrdCh)
-	//defer close(prOrdCh)
-	//defer close(errCh)
+// Receive receives stream data from websocket.
+func (bf *WebSocketClient) Receive() {
 
 	for {
 
 		var res map[string]interface{}
 		if err := bf.Con.ReadJSON(&res); err != nil {
 			log.Println("Received error:", err)
-			//errCh <- err
 			bf.Cb.OnErrorOccur("", err)
 			return
 		}
@@ -296,7 +281,6 @@ func (bf *WebSocketClient) Receive(
 						execDate, err := time.Parse(time.RFC3339Nano, e["exec_date"].(string))
 						if err != nil {
 							logf("Failed to parse time received from executions channel: %s", e["exec_date"].(string))
-							//errCh <- err
 							bf.Cb.OnErrorOccur(ch, err)
 						}
 						execution := Execution{
@@ -311,16 +295,13 @@ func (bf *WebSocketClient) Receive(
 						}
 						executions = append(executions, execution)
 					}
-					//excCh <- executions
 					bf.Cb.OnReceiveExecutions(ch, executions)
 
 				} else if strings.HasPrefix(ch, channelBoardSnapshot) {
 					bf.Cb.OnReceiveBoardSnapshot(ch, newBoard(p["message"].(map[string]interface{})))
-					//brdSnpCh <- newBoard(p["message"].(map[string]interface{}))
 
 				} else if strings.HasPrefix(ch, channelBoard) {
 					bf.Cb.OnReceiveBoard(ch, newBoard(p["message"].(map[string]interface{})))
-					//brdCh <- newBoard(p["message"].(map[string]interface{}))
 
 				} else if strings.HasPrefix(ch, channelChildOrder) {
 
@@ -328,16 +309,13 @@ func (bf *WebSocketClient) Receive(
 					msg := p["message"].(interface{}).([]interface{})
 					msgJson, err := json.Marshal(&msg)
 					if err != nil {
-						//errCh <- err
 						bf.Cb.OnErrorOccur(ch, err)
 					}
 					err = json.Unmarshal(msgJson, &events)
 					if err != nil {
 						logf("Failed to parse ChildOrderEvent: %v", string(msgJson))
-						//errCh <- err
 						bf.Cb.OnErrorOccur(ch, err)
 					}
-					//chOrdCh <- events
 					bf.Cb.OnReceiveChildOrderEvents(ch, events)
 
 				} else if strings.HasPrefix(ch, channelParentOrder) {
@@ -347,16 +325,13 @@ func (bf *WebSocketClient) Receive(
 					msg := p["message"].(interface{}).([]interface{})
 					msgJson, err := json.Marshal(&msg)
 					if err != nil {
-						//errCh <- err
 						bf.Cb.OnErrorOccur(ch, err)
 					}
 					err = json.Unmarshal(msgJson, &events)
 					if err != nil {
 						logf("Failed to parse ParentOrderEvent: %v", string(msgJson))
-						//errCh <- err
 						bf.Cb.OnErrorOccur(ch, err)
 					}
-					//log.Println(events)
 					bf.Cb.OnReceiveParentOrderEvents(ch, events)
 
 				} else if strings.HasPrefix(ch, channelTicker) {
@@ -382,7 +357,6 @@ func (bf *WebSocketClient) Receive(
 						Volume:          t["volume"].(float64),
 						VolumeByProduct: t["volume_by_product"].(float64),
 					}
-					//tkrCh <- ticker
 					bf.Cb.OnReceiveTicker(ch, &ticker)
 				}
 			}
@@ -395,6 +369,7 @@ func (bf *WebSocketClient) Receive(
 					if result.(bool) {
 						log.Println("Succeeded to authenticate.")
 						bf.SubscribeChildOrder()
+						// TODO: subscrive parent child order
 					} else {
 						log.Println("Failed to authenticate.")
 					}
@@ -435,4 +410,4 @@ func randomHex(n int) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
-}
+
