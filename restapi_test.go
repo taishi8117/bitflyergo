@@ -3,6 +3,7 @@ package bitflyergo
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -26,6 +27,7 @@ func TestMain(m *testing.M) {
 func TestGetPositions(t *testing.T) {
 	_, err := api.GetPositions(productCode)
 	if err != nil {
+		fmt.Printf("%v\n", reflect.TypeOf(err))
 		t.Fatal(err)
 	}
 }
@@ -57,6 +59,14 @@ func TestGetMeChildOrders(t *testing.T) {
 	}
 	_, err := api.GetChildOrders(params)
 	if err != nil {
+		fmt.Printf("%v\n", reflect.TypeOf(err))
+		switch e := err.(type) {
+		case *ApiError:
+			fmt.Printf("APIERROR!!! [%v]", e.Status)
+		default:
+			fmt.Println("ETC!!!")
+
+		}
 		t.Fatal(err)
 	}
 }
