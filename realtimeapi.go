@@ -27,18 +27,18 @@ const (
 	authJsonRpcId        = 1
 )
 
-type SubscribeParams struct {
+type subscribeParams struct {
 	Channel string `json:"channel"`
 }
 
-type AuthParams struct {
+type authParams struct {
 	ApiKey    string `json:"api_key"`
 	Timestamp int64  `json:"timestamp"`
 	Nonce     string `json:"nonce"`
 	Signature string `json:"signature"`
 }
 
-type JsonRPC2 struct {
+type jsonRPC2 struct {
 	Version string      `json:"version"`
 	Method  string      `json:"method"`
 	Params  interface{} `json:"params"`
@@ -51,38 +51,54 @@ type WebSocketClient struct {
 	Cb    Callback
 }
 
+// Callback is the callback functions when receiving data from websocket.
 type Callback interface {
+
+	// OnReceiveBoard is the callbck when board is received from websocket.
 	OnReceiveBoard(channelName string, board *Board)
+
+	// OnReceiveBoardSnapshot is the callbck when board snapshot is received from websocket.
 	OnReceiveBoardSnapshot(channelName string, board *Board)
+
+	// OnReceiveExecutions is the callbck when executions is received from websocket.
 	OnReceiveExecutions(channelName string, executions []Execution)
+
+	// OnReceiveTicker is the callbck when ticker is received from websocket.
 	OnReceiveTicker(channelName string, ticker *Ticker)
+
+	// OnReceiveChildOrderEvents is the callbck when child order event is received from websocket.
 	OnReceiveChildOrderEvents(channelName string, event []ChildOrderEvent)
+
+	// OnReceiveParentOrderEvents is the callbck when board is received from websocket.
 	OnReceiveParentOrderEvents(channelName string, event []ParentOrderEvent)
+
+	// OnErrorOccur is the callbck when error is occurred during receiving stream data.
 	OnErrorOccur(channelName string, err error)
 }
 
-// Event of child order happened.
+// ChildOrderEvent is type of child order event receiving from websocket.
 type ChildOrderEvent struct {
-	ProductCode            string         `json:"product_code"`
-	ChildOrderId           string         `json:"child_order_id"`
-	ChildOrderAcceptanceId string         `json:"child_order_acceptance_id"`
-	EventDate              EventTime      `json:"event_date"`
-	EventType              string         `json:"event_type"`
-	ChildOrderType         string         `json:"child_order_type"`
-	ExpireDate             TimeWithSecond `json:"expire_date"`
-	Reason                 string         `json:"reason"`
-	ExecId                 int            `json:"exec_id"`
-	Side                   string         `json:"side"`
-	Price                  int            `json:"price"`
-	Size                   float64        `json:"size"`
-	Commission             float64        `json:"commission"`
-	Sfd                    float64        `json:"sfd"`
+	ProductCode            string         `json:"product_code"`              // product_code
+	ChildOrderId           string         `json:"child_order_id"`            // child_order_id
+	ChildOrderAcceptanceId string         `json:"child_order_acceptance_id"` // child_order_acceptance_id
+	EventDate              EventTime      `json:"event_date"`                // event_date
+	EventType              string         `json:"event_type"`                // event_type
+	ChildOrderType         string         `json:"child_order_type"`          // child_order_type
+	ExpireDate             TimeWithSecond `json:"expire_date"`               // expire_date
+	Reason                 string         `json:"reason"`                    // reason
+	ExecId                 int            `json:"exec_id"`                   // exec_id
+	Side                   string         `json:"side"`                      // side
+	Price                  int            `json:"price"`                     // price
+	Size                   float64        `json:"size"`                      // size
+	Commission             float64        `json:"commission"`                // commission
+	Sfd                    float64        `json:"sfd"`                       // sfd
 }
 
 type EventTime struct {
 	*time.Time
 }
 
+// Logger is logger.
 var Logger *log.Logger
 
 func logf(format string, v ...interface{}) {
@@ -93,12 +109,14 @@ func logf(format string, v ...interface{}) {
 	Logger.Printf(format, v...)
 }
 
+// UnmarshalJSON converts json data to EventTime.
 func (tt *EventTime) UnmarshalJSON(data []byte) error {
 	t, err := time.Parse("\"2006-01-02T15:04:05.9Z\"", string(data))
 	*tt = EventTime{&t}
 	return err
 }
 
+// String converts all fields value to one string.
 func (t *ChildOrderEvent) String() string {
 	tp := reflect.TypeOf(t)
 	return fmt.Sprintf(
@@ -160,10 +178,10 @@ func (bf *WebSocketClient) Auth(apiKey string, apiSecret string) error {
 	message := strconv.FormatInt(timestamp, 10) + nonce
 
 	// signed message
-	jsonRpc := &JsonRPC2{
+	jsonRpc := &jsonRPC2{
 		Version: "2.0",
 		Method:  "auth",
-		Params: AuthParams{
+		Params: authParams{
 			ApiKey:    apiKey,
 			Timestamp: timestamp,
 			Nonce:     nonce,
@@ -179,26 +197,32 @@ func (bf *WebSocketClient) Auth(apiKey string, apiSecret string) error {
 	return nil
 }
 
+// SubscribeTicker subscribes ticker.
 func (bf *WebSocketClient) SubscribeTicker(symbol string) {
 	bf.subscribe(channelTicker + symbol)
 }
 
+// SubscribeExecutions subscribes executions.
 func (bf *WebSocketClient) SubscribeExecutions(symbol string) {
 	bf.subscribe(channelExecutions + symbol)
 }
 
+// SubscribeBoard subscribes board.
 func (bf *WebSocketClient) SubscribeBoard(symbol string) {
 	bf.subscribe(channelBoard + symbol)
 }
 
+// SubscribeBoardSnapshot subscribes board snapshot.
 func (bf *WebSocketClient) SubscribeBoardSnapshot(symbol string) {
 	bf.subscribe(channelBoardSnapshot + symbol)
 }
 
+// SubscribeChildOrder subscribes child orders.
 func (bf *WebSocketClient) SubscribeChildOrder() {
 	bf.subscribe(channelChildOrder)
 }
 
+// SubscribeParentOrder subscribes parent orders.
 func (bf *WebSocketClient) SubscribeParentOrder() {
 	bf.subscribe(channelParentOrder)
 }
@@ -242,10 +266,10 @@ func (bf WebSocketClient) unsubscribe(channel string) {
 }
 
 func (bf WebSocketClient) writeJson(channel string, method string) error {
-	if err := bf.Con.WriteJSON(&JsonRPC2{
+	if err := bf.Con.WriteJSON(&jsonRPC2{
 		Version: "2.0",
 		Method:  method,
-		Params:  &SubscribeParams{channel}}); err != nil {
+		Params:  &subscribeParams{channel}}); err != nil {
 		return err
 	}
 	return nil

@@ -39,7 +39,7 @@ const (
 	baseUrl = "https://api.bitflyer.com" // url for restfull api
 )
 
-// Create new Bitflyer
+// NewBitflyer creates Bitflyer instance.
 func NewBitflyer(
 	apiKey string,
 	apiSecret string,
