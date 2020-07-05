@@ -89,6 +89,7 @@ func (b *Board) SortBids() []float64 {
 
 type Market struct {
 	ProductCode string `json:"product_code"`
+	MarketType  string `json:"market_type"`
 	Alias       string `json:"alias"`
 }
 

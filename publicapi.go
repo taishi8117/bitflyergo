@@ -14,17 +14,17 @@ var (
 	PathGetHealth     = "/gethealth"
 )
 
-func (bf *Bitflyer) GetMarkets() (*[]Market, error) {
+func (bf *Bitflyer) GetMarkets() ([]Market, error) {
 	res, err := bf.get(bf.getUrl(PathGetMarkets), nil, bf.getDefaultHeaders())
 	if err != nil {
 		return nil, err
 	}
-	var market []Market
-	err = json.Unmarshal(res, &market)
+	var markets []Market
+	err = json.Unmarshal(res, &markets)
 	if err != nil {
 		return nil, err
 	}
-	return &market, nil
+	return markets, nil
 }
 
 func (bf *Bitflyer) GetTicker(productCode string) (*Ticker, error) {

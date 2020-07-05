@@ -286,9 +286,6 @@ func (bf *WebSocketClient) Receive() {
 			bf.Cb.OnErrorOccur("", err)
 			return
 		}
-		if bf.Debug {
-			log.Println("Received data:", res)
-		}
 
 		if method, ok := res["method"]; ok {
 			if method == "channelMessage" {
@@ -307,7 +304,7 @@ func (bf *WebSocketClient) Receive() {
 							logf("Failed to parse time received from executions channel: %s", e["exec_date"].(string))
 							bf.Cb.OnErrorOccur(ch, err)
 						}
-						execution := Execution{
+						executions = append(executions, Execution{
 							Id:                         int64(e["id"].(float64)),
 							ExecDate:                   execDate,
 							Price:                      e["price"].(float64),
@@ -316,9 +313,9 @@ func (bf *WebSocketClient) Receive() {
 							BuyChildOrderAcceptanceId:  e["buy_child_order_acceptance_id"].(string),
 							SellChildOrderAcceptanceId: e["sell_child_order_acceptance_id"].(string),
 							ReceivedTime:               receivedTime,
-						}
-						executions = append(executions, execution)
+						})
 					}
+
 					bf.Cb.OnReceiveExecutions(ch, executions)
 
 				} else if strings.HasPrefix(ch, channelBoardSnapshot) {
@@ -329,6 +326,7 @@ func (bf *WebSocketClient) Receive() {
 
 				} else if strings.HasPrefix(ch, channelChildOrder) {
 
+					// TODO Improve speed (Don't use Marchal and Unmarchal)
 					var events []ChildOrderEvent
 					msg := p["message"].(interface{}).([]interface{})
 					msgJson, err := json.Marshal(&msg)
@@ -341,6 +339,7 @@ func (bf *WebSocketClient) Receive() {
 						bf.Cb.OnErrorOccur(ch, err)
 					}
 					bf.Cb.OnReceiveChildOrderEvents(ch, events)
+					//log.Printf("time: %v\n", time.Now().Sub(receivedTime))
 
 				} else if strings.HasPrefix(ch, channelParentOrder) {
 
@@ -367,7 +366,7 @@ func (bf *WebSocketClient) Receive() {
 						//errCh <- err
 						bf.Cb.OnErrorOccur(ch, err)
 					}
-					ticker := Ticker{
+					bf.Cb.OnReceiveTicker(ch, &Ticker{
 						ProductCode:     t["product_code"].(string),
 						Timestamp:       TickerTime{&timestamp},
 						TickId:          int64(t["tick_id"].(float64)),
@@ -380,8 +379,7 @@ func (bf *WebSocketClient) Receive() {
 						Ltp:             t["ltp"].(float64),
 						Volume:          t["volume"].(float64),
 						VolumeByProduct: t["volume_by_product"].(float64),
-					}
-					bf.Cb.OnReceiveTicker(ch, &ticker)
+					})
 				}
 			}
 
