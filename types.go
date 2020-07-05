@@ -17,6 +17,7 @@ func (tt *TimeWithSecond) UnmarshalJSON(data []byte) error {
 	return err
 }
 
+// bitFlyer
 type Bitflyer struct {
 	BaseUrl       string
 	ApiVersion    string
@@ -200,7 +201,7 @@ type MyExecution struct {
 	Side                   string     `json:"side"`
 	Price                  float64    `json:"price"`
 	Size                   float64    `json:"size"`
-	Commition              float64    `json:"commision"`
+	Commission             float64    `json:"commission"`
 	ExecDate               TickerTime `json:"exec_date"`
 	ChildOrderAcceptanceId string     `json:"child_order_acceptance_id"`
 }
