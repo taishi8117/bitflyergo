@@ -1,7 +1,13 @@
 package bitflyergo
 
 const (
-	ProductCodeBtcJpy   = "BTC_JPY"    // product code: BTC_JPY
-	ProductCodeFxBtcJpy = "FX_BTC_JPY" // product code: FX_BTC_JPY
-	ProductCodeEthBtc   = "ETH_BTC"    // product code: ETH_BTC
+
+	// ProductCodeBtcJpy is product code of BTC_JPY
+	ProductCodeBtcJpy = "BTC_JPY"
+
+	// ProductCodeFxBtcJpy is product code of FX_BTC_JPY
+	ProductCodeFxBtcJpy = "FX_BTC_JPY"
+
+	// ProductCodeEthBtc is product code of ETH_BTC
+	ProductCodeEthBtc = "ETH_BTC"
 )

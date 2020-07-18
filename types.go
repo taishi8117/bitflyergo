@@ -79,7 +79,7 @@ type Ticker struct {
 	VolumeByProduct float64    `json:"volume_by_product"` // volume_by_product
 }
 
-// TickerTime
+// TickerTime is time of ticker.
 type TickerTime struct {
 	*time.Time
 }
@@ -91,19 +91,19 @@ func (tt *TickerTime) UnmarshalJSON(data []byte) error {
 	return err
 }
 
-// BoardState
+// BoardState is board's state.
 type BoardState struct {
 	Health string             `json:"health"` // health
 	State  string             `json:"state"`  // state
 	Data   map[string]float64 `json:"data"`   // data
 }
 
-// Health
+// Health is market health state.
 type Health struct {
 	Status string `json:"status"` // status
 }
 
-// Collateral
+// Collateral is the collateral of account.
 type Collateral struct {
 	Collateral        float64 `json:"collateral"`         // collateral
 	OpenPositionPnl   float64 `json:"open_position_pnl"`  // open_position_pnl
@@ -111,14 +111,14 @@ type Collateral struct {
 	KeepRate          float64 `json:"keep_rate"`          // keep_rate
 }
 
-// Balance
+// Balance is the balance of account.
 type Balance struct {
 	CurrencyCode string `json:"currency_code"` // currency_code
 	Amount       int64  `json:"amount"`        // amount
 	Available    int64  `json:"available"`     // available
 }
 
-// ChildOrder
+// ChildOrder is own child orders.
 type ChildOrder struct {
 	Id                     int64          `json:"id"`                        // id
 	ChildOrderId           string         `json:"child_order_id"`            // child_order_id
@@ -139,7 +139,7 @@ type ChildOrder struct {
 	Executions             []MyExecution
 }
 
-// Position
+// Position is own positions.
 type Position struct {
 	ProductCode         string         `json:"product_code"`          // product_code
 	Side                string         `json:"side"`                  // side
@@ -167,7 +167,7 @@ func (err *ApiError) Error() string {
 		"Error -> status: %v, error_message: %v, data: %v\n", err.Status, err.ErrorMessage, err.Data)
 }
 
-// MyExecution
+// MyExecution is executed own history.
 type MyExecution struct {
 	Id                     int64      `json:"id"`                        // id
 	ChildOrderId           string     `json:"child_order_id"`            // child_order_id
