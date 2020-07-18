@@ -50,15 +50,14 @@ func TestGetMeChildOrders(t *testing.T) {
 		}
 		_, err := api.GetChildOrders(params)
 		if err != nil {
-			fmt.Printf("%v\n", reflect.TypeOf(err))
 			switch e := err.(type) {
 			case *ApiError:
-				fmt.Printf("APIERROR!!! [%v]", e.Status)
+				if e.Status != 500 {
+					t.Fatal(err)
+				}
 			default:
-				fmt.Println("ETC!!!")
-
+				t.Fatal(err)
 			}
-			t.Fatal(err)
 		}
 	}
 }
