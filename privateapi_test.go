@@ -14,9 +14,8 @@ func newBitflyerWithAuth() *Bitflyer {
 	apiSecret := os.Getenv("APISECRET")
 	if apiKey != "" && apiSecret != "" {
 		return NewBitflyer(apiKey, apiSecret, []int{-1}, 1, 1)
-	} else {
-		fmt.Println("[warn] APIKEY and APISECRET must be defined if you want to test private APIs.")
 	}
+	fmt.Println("[warn] APIKEY and APISECRET must be defined if you want to test private APIs.")
 	return nil
 }
 

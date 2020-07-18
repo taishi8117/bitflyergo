@@ -9,28 +9,28 @@ import (
 
 const (
 
-	// path of api to get own executions
+	// PathGetMyExecutions is path of api to get own executions
 	PathGetMyExecutions = "/me/getexecutions"
 
-	// path of api to get own child orders
+	// PathGetChildOrders is path of api to get own child orders
 	PathGetChildOrders = "/me/getchildorders"
 
-	// path of api to get positions
+	// PathGetPositions is path of api to get positions
 	PathGetPositions = "/me/getpositions"
 
-	// path of api to get collateral
+	// PathGetCollateral is path of api to get collateral
 	PathGetCollateral = "/me/getcollateral"
 
-	// path of api to get balance
+	// PathGetBalance is path of api to get balance
 	PathGetBalance = "/me/getbalance"
 
-	// path of api to send child order
+	// PathSendChildOrder is path of api to send child order
 	PathSendChildOrder = "/me/sendchildorder"
 
-	// path of api to cancel child order
+	// PathCancelChildOrder is path of api to cancel child order
 	PathCancelChildOrder = "/me/cancelchildorder"
 
-	// path of api to cancel all child orders
+	// PathCancelAllChildOrders is path of api to cancel all child orders
 	PathCancelAllChildOrders = "/me/cancelallchildorders"
 )
 
@@ -113,8 +113,8 @@ func (bf *Bitflyer) SendChildOrder(productCode string, childOrderType string,
 	side string, size float64, params map[string]string) (map[string]string, error) {
 
 	if size < MinimumOrderbleSize {
-		return nil, errors.New(fmt.Sprintf(
-			"Sizes less than %v can not be ordered. [%v]\n", MinimumOrderbleSize, size))
+		return nil, fmt.Errorf(
+			"Sizes less than %v can not be ordered. [%v]\n", MinimumOrderbleSize, size)
 	}
 
 	if params == nil {
@@ -148,7 +148,7 @@ func (bf *Bitflyer) CancelAllChildOrders(productCode string) error {
 	return err
 }
 
-// CancelChildOrders cancels child orders.
+// CancelChildOrder cancels child orders.
 func (bf *Bitflyer) CancelChildOrder(productCode string, childOrderAcceptanceId string) error {
 	params := map[string]string{
 		"product_code":              productCode,
