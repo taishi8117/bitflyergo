@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// OHLC(open, high, low, close) is four value candle.
 type OHLC struct {
 	Time   time.Time
 	Open   float64

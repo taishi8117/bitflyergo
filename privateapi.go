@@ -8,14 +8,30 @@ import (
 )
 
 const (
-	PathGetMyExecutions      = "/me/getexecutions"        // path of api to get own executions
-	PathGetChildOrders       = "/me/getchildorders"       // path of api to get own child orders
-	PathGetPositions         = "/me/getpositions"         // path of api to get positions
-	PathGetCollateral        = "/me/getcollateral"        // path of api to get collateral
-	PathGetBalance           = "/me/getbalance"           // path of api to get balance
-	PathSendChildOrder       = "/me/sendchildorder"       // path of api to send child order
-	PathCancelChildOrder     = "/me/cancelchildorder"     // path of api to cancel child order
-	PathCancelAllChildOrders = "/me/cancelallchildorders" // path of api to cancel all child orders
+
+	// path of api to get own executions
+	PathGetMyExecutions = "/me/getexecutions"
+
+	// path of api to get own child orders
+	PathGetChildOrders = "/me/getchildorders"
+
+	// path of api to get positions
+	PathGetPositions = "/me/getpositions"
+
+	// path of api to get collateral
+	PathGetCollateral = "/me/getcollateral"
+
+	// path of api to get balance
+	PathGetBalance = "/me/getbalance"
+
+	// path of api to send child order
+	PathSendChildOrder = "/me/sendchildorder"
+
+	// path of api to cancel child order
+	PathCancelChildOrder = "/me/cancelchildorder"
+
+	// path of api to cancel all child orders
+	PathCancelAllChildOrders = "/me/cancelallchildorders"
 )
 
 // GetMyExecutions gets own executions.
