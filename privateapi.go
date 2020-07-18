@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-var (
+const (
 	PathGetMyExecutions      = "/me/getexecutions"        // path of api to get own executions
 	PathGetChildOrders       = "/me/getchildorders"       // path of api to get own child orders
 	PathGetPositions         = "/me/getpositions"         // path of api to get positions

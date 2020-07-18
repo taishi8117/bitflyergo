@@ -175,16 +175,6 @@ type Position struct {
 	Std                 float64        `json:"sfd"`
 }
 
-type OHLC struct {
-	Time   time.Time
-	Open   float64
-	High   float64
-	Low    float64
-	Close  float64
-	Volume float64
-	Delay  time.Duration
-}
-
 type ApiError struct {
 	Status       int    `json:"status"`
 	ErrorMessage string `json:"error_message"`

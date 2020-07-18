@@ -17,15 +17,15 @@ Here are some ways to use the library. If you want to know API specification, Se
 
 ### Initialize
 
-You need call `bitflyer.NewBitflyer` with arguments. First argument is your api key, second that is your api secret. If you don't use private api, you may specify blank.
+You need to call `bitflyergo.NewBitflyer` with arguments. First argument is your api key, second that is your api secret. If you don't use private api, you may specify blank.
 
 ```go
 apiKey := "<Your API Key>"
 apiSecret := "<Your API Secret>"
-bf := bitflyer.NewBitflyer(apiKey, apiSecret)
+bf := bitflyergo.NewBitflyer(apiKey, apiSecret)
 ```
 
-### Public API
+### Call Public API
 
 #### /v1/getexecutions
 
@@ -62,7 +62,7 @@ for _, e := range *executions {
 board, err := bf.GetBoard()
 ```
 
-### Private API
+### Call Private API
 
 #### /v1/me/getcollateral
 
@@ -87,19 +87,72 @@ Place the market order. market order does't need to specify price of argument.
 childOrderAcceptanceId, err := api.SendChildOrder("FX_BTC_JPY", "MARKET", "BUY", 0.01, nil)
 ```
 
-## Test
+### Receive streaming data from websocket
+
+bitflyergo provides the APIs to use bitFlyer Lightning Realtime API.
+
+First, you need to implement `Callback` interface's methods.
+
+```go
+// OnReceiveBoard is the callbck when board is received from websocket.
+OnReceiveBoard(channelName string, board *Board)
+
+// OnReceiveBoardSnapshot is the callbck when board snapshot is received from websocket.
+OnReceiveBoardSnapshot(channelName string, board *Board)
+
+// OnReceiveExecutions is the callbck when executions is received from websocket.
+OnReceiveExecutions(channelName string, executions []Execution)
+
+// OnReceiveTicker is the callbck when ticker is received from websocket.
+OnReceiveTicker(channelName string, ticker *Ticker)
+
+// OnReceiveChildOrderEvents is the callbck when child order event is received from websocket.
+OnReceiveChildOrderEvents(channelName string, event []ChildOrderEvent)
+
+// OnReceiveParentOrderEvents is the callbck when board is received from websocket.
+OnReceiveParentOrderEvents(channelName string, event []ParentOrderEvent)
+
+// OnErrorOccur is the callbck when error is occurred during receiving stream data.
+OnErrorOccur(channelName string, err error)
+```
+
+Then, Write code for receiving Realtime API data from websocket.
+
+```go
+// Create WebSocketClient with Callback interface implement.
+ws := WebSocketClient{
+    Debug: false,
+	Cb:    &YourCallbackImplement{},
+}
+
+// connect Realtime API.
+err := ws.Connect()
+if err != nil {
+	log.Fatal(err)
+}
+
+// start receiving data. must to use goroutine.
+go ws.Receive()
+
+// subscribe channel
+ws.SubscribeExecutions("FX_BTC_JPY")
+
+interrupt := make(chan os.Signal, 1)
+signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+LOOP:
+	for {
+		select {
+		case _ = <-interrupt:
+			break LOOP
+		}
+	}
+```
+
+## How to test
 
 Tests using private api require following environment variables.
 
-|Name|Value|
-|---|---|
-|APIKEY|Your API Key|
-|APISECRET|Your API Secret|
-
-APIKEY and APISECRET need following permission.
-
-* Collateral
-    * READ
-* Order
-    * READ
-
+```sh
+export APIKEY=<value>
+export APISECRET=<value>
+```

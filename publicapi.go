@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var (
+const (
 	PathGetMarkets    = "/getmarkets"
 	PathGetBoard      = "/getboard"
 	PathGetTicker     = "/getticker"
