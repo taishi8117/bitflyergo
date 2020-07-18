@@ -52,7 +52,7 @@ func TestGetMeChildOrders(t *testing.T) {
 		if err != nil {
 			switch e := err.(type) {
 			case *ApiError:
-				if e.Status != 500 {
+				if e.Status != -500 {
 					t.Fatal(err)
 				}
 			default:
