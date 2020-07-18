@@ -64,10 +64,34 @@ board, err := bf.GetBoard()
 
 ### Call Private API
 
+#### /v1/me/getexecutions
+
+#### /v1/me/getchildorders
+
+```go
+params := map[string]string{
+    "": "",
+}
+childOrders, err := api.GetChildOrders(params)
+```
+
+#### /v1/me/getpositions
+
+```go
+productCode := "FX_BTC_JPY"
+positions, err := api.GetPositions(productCode)
+```
+
 #### /v1/me/getcollateral
 
 ```go
 collateral, err := api.GetCollateral()
+```
+
+#### /v1/me/getbalance
+
+```go
+balance, err := api.GetBalance()
 ```
 
 #### /v1/me/sendchildorder

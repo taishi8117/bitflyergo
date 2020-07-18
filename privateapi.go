@@ -33,6 +33,9 @@ func (bf *Bitflyer) GetMyExecutions(params map[string]string) ([]MyExecution, er
 }
 
 // GetChildOrders gets own child orders.
+//
+// Required parameters
+// - product_code
 func (bf *Bitflyer) GetChildOrders(params map[string]string) ([]ChildOrder, error) {
 	res, err := bf.callApiWithRetry("GET", "/v"+bf.ApiVersion+PathGetChildOrders, params)
 	if err != nil {

@@ -18,7 +18,7 @@ func (tt *TimeWithSecond) UnmarshalJSON(data []byte) error {
 	return err
 }
 
-// bitFlyer
+// Bitflyer is bitFlyer api client.
 type Bitflyer struct {
 	BaseUrl       string        // base url
 	ApiVersion    string        // api version
@@ -31,7 +31,7 @@ type Bitflyer struct {
 	client        *http.Client
 }
 
-// Execution
+// Execution is one of the execution history
 type Execution struct {
 	Id                         int64     `json:"id"`                             // id
 	ExecDate                   time.Time `json:"exec_date"`                      // exec_date
@@ -48,7 +48,7 @@ func (e *Execution) Delay() time.Duration {
 	return e.ReceivedTime.Sub(e.ExecDate)
 }
 
-// Board
+// Board is board.
 type Board struct {
 	Time     time.Time           `json:"time"`      // time
 	MidPrice float64             `json:"mid_price"` // mid_price
@@ -56,14 +56,14 @@ type Board struct {
 	Asks     map[float64]float64 `json:"asks"`      // asks
 }
 
-// Market
+// Market is the return value of '/getmarkets' API.
 type Market struct {
 	ProductCode string `json:"product_code"` // product_code
 	MarketType  string `json:"market_type"`  // market_type
 	Alias       string `json:"alias"`        // alias
 }
 
-// Ticker
+// Ticker  is the return value of '/getticker' API.
 type Ticker struct {
 	ProductCode     string     `json:"product_code"`      // product_code
 	Timestamp       TickerTime `json:"timestamp"`         // timestamp
