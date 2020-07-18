@@ -4,36 +4,41 @@ import (
 	"time"
 )
 
-// 約定履歴を指定された時間単位のOHLCに変換します。
-//
-// ローソク足の時刻は、該当の時刻からtimeFrameSecの秒の未来までの情報を示します。
+type OHLC struct {
+	Time   time.Time
+	Open   float64
+	High   float64
+	Low    float64
+	Close  float64
+	Volume float64
+	Delay  time.Duration
+}
+
+// CreateOHLC converts executions to OHLC.
 //
 // e.g.
 //
-//   timeFrameSec: 3 -> xx:xx:00.000000 - xx:xx:02.999999 の範囲の約定情報を反映
-//   timeFrameSec: 5 -> xx:xx:00.000000 - xx:xx:04.999999 の範囲の約定情報を反映
+//   timeFrameSec: 3 -> range is between xx:xx:00.000000 and xx:xx:02.999999
+//   timeFrameSec: 5 -> range is between xx:xx:00.000000 and xx:xx:04.999999
 func CreateOHLC(executions []Execution, timeFrameSec int) ([]OHLC, error) {
 
 	if len(executions) == 0 {
 		return nil, nil
 	}
 
-	// 戻り値用のローソク足
 	var candles []OHLC
 
-	// ローソク足の時間単位
 	timeFrame := time.Duration(timeFrameSec) * time.Second
 
-	// 先頭の約定履歴の約定日時を取得
 	e := executions[0]
 
-	// 先頭のローソク足の時刻を計算
+	// get time of first candle
 	t, err := getCandleTime(e, timeFrameSec)
 	if err != nil {
 		return nil, err
 	}
 
-	// 最初の１本目のローソク足の初期状態を作成
+	// create first candle with initial state
 	ohlc := &OHLC{
 		Time:   t,
 		Open:   e.Price,
@@ -44,12 +49,11 @@ func CreateOHLC(executions []Execution, timeFrameSec int) ([]OHLC, error) {
 		Delay:  time.Duration(0),
 	}
 
-	// 次のローソク足の時刻を計算
+	// get time of next candle
 	nextTime := ohlc.Time.Add(time.Duration(timeFrameSec) * time.Second)
 
-	var delaySec []time.Duration // 遅延時間（秒）
+	var delaySec []time.Duration
 
-	// 各約定履歴の内容からローソク足を作成する
 	for _, e := range executions {
 
 		execDateSec, err := parseExecTime(e)
@@ -60,7 +64,6 @@ func CreateOHLC(executions []Execution, timeFrameSec int) ([]OHLC, error) {
 		// 約定履歴の時刻が、次のローソク足の範囲のものかをチェック
 		if execDateSec.After(nextTime) || execDateSec.Equal(nextTime) {
 
-			// 次のローソク足の作成に移行
 			ohlc.Delay = meanDelay(delaySec)
 			candles = append(candles, *ohlc)
 
@@ -144,21 +147,13 @@ func getCandleTime(e Execution, timeFrame int) (time.Time, error) {
 	return execDateSec, nil
 }
 
-// 遅延時間の平均値を計算します。
 func meanDelay(delays []time.Duration) time.Duration {
-
-	// このローソク足の遅延時間の平均値をとるため、遅延時間を合算
 	sumSec := 0.0
 	for _, delay := range delays {
 		sumSec += delay.Seconds()
 	}
-
 	if sumSec > 0.0 {
-
-		// 遅延時間の平均値（秒）を計算
 		delaySecMean := sumSec / float64(len(delays))
-
-		// Durationはintを受け取るため、.xの秒表現では精度が落ちてしまう。そのため、一旦ミリ秒に変換してからセットする
 		return time.Duration(delaySecMean*1000) * time.Millisecond
 	}
 	return time.Duration(0)
