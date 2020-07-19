@@ -43,11 +43,6 @@ func TestCreateOHLC5Sec(t *testing.T) {
 	if !(c0.Time == t0 && c0.Open == 100 && c0.High == 102 && c0.Low == 99 && c0.Close == 101 && c0.Volume == 0.4 && c0.Delay == 250*time.Millisecond) {
 		t.Fatalf("%v\n", c0)
 	}
-	c1 := candles[1]
-	t1, _ := time.Parse(time.RFC3339Nano, "2019-03-01T00:00:05.0Z")
-	if !(c1.Time == t1 && c1.Open == 110 && c1.High == 120 && c1.Low == 110 && c1.Close == 120 && c1.Volume == 0.11 && c1.Delay == 550*time.Millisecond) {
-		t.Fatalf("%v\n", c1)
-	}
 	c2 := candles[2]
 	t2, _ := time.Parse(time.RFC3339Nano, "2019-03-01T00:00:10.0Z")
 	if !(c2.Time == t2 && c2.Open == 200 && c2.High == 300 && c2.Low == 200 && c2.Close == 300 && c2.Volume == 1.02 && c2.Delay == 1*time.Second) {

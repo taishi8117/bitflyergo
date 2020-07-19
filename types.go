@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// TimeWithSecond
+// TimeWithSecond is time with second as time.Time
 type TimeWithSecond struct {
 	*time.Time
 }
@@ -43,7 +43,7 @@ type Execution struct {
 	ReceivedTime               time.Time `json:receivedTime`                     // receivedTime
 }
 
-// Returns receiving delayed time
+// Delay returns delayed time of execution.
 func (e *Execution) Delay() time.Duration {
 	return e.ReceivedTime.Sub(e.ExecDate)
 }
