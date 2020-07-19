@@ -6,12 +6,23 @@ import (
 )
 
 const (
-	PathGetMarkets    = "/getmarkets"
-	PathGetBoard      = "/getboard"
-	PathGetTicker     = "/getticker"
+	// PathGetMarkets is path of '/getmarkets'
+	PathGetMarkets = "/getmarkets"
+
+	// PathGetBoard is path of '/getboard'
+	PathGetBoard = "/getboard"
+
+	// PathGetTicker is path of '/getticker'
+	PathGetTicker = "/getticker"
+
+	// PathGetExecutions is path of '/getexecutions'
 	PathGetExecutions = "/getexecutions"
+
+	// PathGetBoardState is path of '/getboardstate'
 	PathGetBoardState = "/getboardstate"
-	PathGetHealth     = "/gethealth"
+
+	// PathGetHealth is path of '/gethealth'
+	PathGetHealth = "/gethealth"
 )
 
 // GetMarkets gets market information.
