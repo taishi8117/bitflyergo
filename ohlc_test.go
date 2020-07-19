@@ -38,15 +38,13 @@ func TestCreateOHLC5Sec(t *testing.T) {
 	if len(candles) != 3 {
 		t.Fatalf("Expect: 2, Actual: %v, %s", len(candles), "length of candles is not match.")
 	}
-	c0 := candles[0]
 	t0, _ := time.Parse(time.RFC3339Nano, "2019-03-01T00:00:00.0Z")
-	if !(c0.Time == t0 && c0.Open == 100 && c0.High == 102 && c0.Low == 99 && c0.Close == 101 && c0.Volume == 0.4 && c0.Delay == 250*time.Millisecond) {
-		t.Fatalf("%v\n", c0)
+	if !checkCandle(candles[0], t0, 100, 102, 99, 101, 0.4, 250*time.Millisecond) {
+		t.Fatalf("%v\n", candles[0])
 	}
-	c2 := candles[2]
 	t2, _ := time.Parse(time.RFC3339Nano, "2019-03-01T00:00:10.0Z")
-	if !(c2.Time == t2 && c2.Open == 200 && c2.High == 300 && c2.Low == 200 && c2.Close == 300 && c2.Volume == 1.02 && c2.Delay == 1*time.Second) {
-		t.Fatalf("%v\n", c2)
+	if !checkCandle(candles[2], t2, 200, 300, 200, 300, 1.02, 1*time.Second) {
+		t.Fatalf("%v\n", candles[2])
 	}
 }
 
@@ -58,6 +56,10 @@ func TestCreateOHLC10Sec(t *testing.T) {
 	if len(candles) != 2 {
 		t.Fatalf("Expect: 2, Actual: %v, %s", len(candles), "length of candles is not match.")
 	}
+}
+
+func checkCandle(c OHLC, t time.Time, o float64, h float64, l float64, cl float64, v float64, d time.Duration) bool {
+	return c.Time == t && c.Open == o && c.High == h && c.Low == l && c.Close == cl && c.Volume == v && c.Delay == d
 }
 
 func getExecutions() []Execution {
