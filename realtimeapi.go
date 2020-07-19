@@ -282,7 +282,7 @@ func (bf *WebSocketClient) Receive() {
 
 		var res map[string]interface{}
 		if err := bf.Con.ReadJSON(&res); err != nil {
-			logf("Received error:", err)
+			logf("Received error: %v\n", err)
 			bf.Cb.OnErrorOccur("", err)
 			return
 		}
