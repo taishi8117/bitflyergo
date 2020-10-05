@@ -139,20 +139,20 @@ func (t *ChildOrderEvent) String() string {
 
 // Event of parent order happened.
 type ParentOrderEvent struct {
-	ProductCode             string         `json:"product_code"`
-	ParentOrderId           string         `json:"parent_order_id"`
-	ParentOrderAcceptanceId string         `json:"parent_order_acceptance_id"`
-	EventDate               EventTime      `json:"event_date"`
-	EventType               string         `json:"event_type"`
-	ParentOrderType         string         `json:"parent_order_type"`
-	Reason                  string         `json:"reason"`
-	ChildOrderType          string         `json:"child_order_type"`
-	ParameterIndex          int            `json:"parameter_index"`
-	ChildOrderAcceptanceId  string         `json:"child_order_acceptance_id"`
-	Side                    string         `json:"side"`
-	Price                   int            `json:"price"`
-	Size                    float64        `json:"size"`
-	ExpireDate              TimeWithSecond `json:"expire_date"`
+	ProductCode             string         `json:"product_code"`               // product_code
+	ParentOrderId           string         `json:"parent_order_id"`            // parent_order_id
+	ParentOrderAcceptanceId string         `json:"parent_order_acceptance_id"` // parent_order_acceptance_id
+	EventDate               EventTime      `json:"event_date"`                 // event_date
+	EventType               string         `json:"event_type"`                 // event_type
+	ParentOrderType         string         `json:"parent_order_type"`          // parent_order_type
+	Reason                  string         `json:"reason"`                     // reason
+	ChildOrderType          string         `json:"child_order_type"`           // child_order_type
+	ParameterIndex          int            `json:"parameter_index"`            // parameter_index
+	ChildOrderAcceptanceId  string         `json:"child_order_acceptance_id"`  // child_order_acceptance_id
+	Side                    string         `json:"side"`                       // side
+	Price                   int            `json:"price"`                      // price
+	Size                    float64        `json:"size"`                       // size
+	ExpireDate              TimeWithSecond `json:"expire_date"`                // expire_date
 }
 
 // Connect connects to bitflyer's realtime api server.
@@ -166,7 +166,7 @@ func (bf *WebSocketClient) Connect() error {
 	return nil
 }
 
-// Authenticate for subscribing private channel.
+// Auth authenticates client to subscribe private channels.
 func (bf *WebSocketClient) Auth(apiKey string, apiSecret string) error {
 
 	// create message
@@ -227,10 +227,12 @@ func (bf *WebSocketClient) SubscribeParentOrder() {
 	bf.subscribe(channelParentOrder)
 }
 
+// UnsubscribeTicker unsubscribes 'lightning_ticker_${symbol}'.
 func (bf *WebSocketClient) UnsubscribeTicker(symbol string) {
 	bf.unsubscribe(channelTicker + symbol)
 }
 
+// UnsubscribeExecutions unsubscribes 'lightning_executions_${symbol}'.
 func (bf *WebSocketClient) UnsubscribeExecutions(symbol string) {
 	bf.unsubscribe(channelExecutions + symbol)
 }
@@ -275,7 +277,7 @@ func (bf WebSocketClient) writeJson(channel string, method string) error {
 	return nil
 }
 
-// Receive receives stream data from websocket.
+// Receive start receiving stream data from websocket.
 func (bf *WebSocketClient) Receive() {
 
 	for {
