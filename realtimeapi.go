@@ -3,7 +3,6 @@ package bitflyergo
 import (
 	"encoding/hex"
 	"fmt"
-	"log"
 	url2 "net/url"
 	"strconv"
 	"strings"
@@ -96,17 +95,6 @@ type ChildOrderEvent struct {
 
 type EventTime struct {
 	*time.Time
-}
-
-// Logger is logger.
-var Logger *log.Logger
-
-func logf(format string, v ...interface{}) {
-	if Logger == nil {
-		log.Printf(format, v...)
-		return
-	}
-	Logger.Printf(format, v...)
 }
 
 // UnmarshalJSON converts json data to EventTime.
@@ -255,14 +243,14 @@ func (bf *WebSocketClient) UnsubscribeParentOrder() {
 
 func (bf WebSocketClient) subscribe(channel string) {
 	if bf.Debug {
-		log.Println("Subscribe " + channel)
+		logln("Subscribe " + channel)
 	}
 	_ = bf.writeJson(channel, "subscribe")
 }
 
 func (bf WebSocketClient) unsubscribe(channel string) {
 	if bf.Debug {
-		log.Println("Unsubscribe " + channel)
+		logln("Unsubscribe " + channel)
 	}
 	_ = bf.writeJson(channel, "unsubscribe")
 }
@@ -287,6 +275,10 @@ func (bf *WebSocketClient) Receive() {
 			logf("Received error: %v\n", err)
 			bf.Cb.OnErrorOccur("", err)
 			return
+		}
+
+		if bf.Debug {
+			dump(res)
 		}
 
 		if method, ok := res["method"]; ok {
@@ -341,7 +333,7 @@ func (bf *WebSocketClient) Receive() {
 						bf.Cb.OnErrorOccur(ch, err)
 					}
 					bf.Cb.OnReceiveChildOrderEvents(ch, events)
-					//log.Printf("time: %v\n", time.Now().Sub(receivedTime))
+					//logf("time: %v\n", time.Now().Sub(receivedTime))
 
 				} else if strings.HasPrefix(ch, channelParentOrder) {
 
@@ -391,17 +383,17 @@ func (bf *WebSocketClient) Receive() {
 			if id.(float64) == authJsonRpcId {
 				if result, ok := res["result"]; ok {
 					if result.(bool) {
-						log.Println("Succeeded to authenticate.")
+						logln("Succeeded to authenticate.")
 						bf.SubscribeChildOrder()
 						// TODO: subscrive parent child order
 					} else {
-						log.Println("Failed to authenticate.")
+						logln("Failed to authenticate.")
 					}
 				}
 			}
 		}
 	}
-	log.Println("Finished receive websocket.")
+	logln("Finished receive websocket.")
 }
 
 func newBoard(message map[string]interface{}) *Board {
@@ -434,4 +426,49 @@ func randomHex(n int) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+func dump(data map[string]interface{}) {
+
+	if method, ok := data["method"]; ok {
+		if method == "channelMessage" {
+			p := data["params"].(map[string]interface{})
+			ch := p["channel"].(string)
+
+			if strings.HasPrefix(ch, channelExecutions) { // for executions
+
+				logln("Received execution >>>")
+				message := p["message"].([]interface{})
+				for _, m := range message {
+					e := m.(map[string]interface{})
+					execDate, err := time.Parse(time.RFC3339Nano, e["exec_date"].(string))
+					if err == nil {
+						logf("[execution] id=%.0f, execDate=%v, side=%s price=%.0f, size=%.3f, buy=%v, sell=%v\n",
+							e["id"], execDate, e["side"], e["price"], e["size"],
+							e["buy_child_order_acceptance_id"], e["sell_child_order_acceptance_id"])
+					}
+				}
+				logln("<<< Received execution")
+
+			} else if strings.HasPrefix(ch, channelBoard) { // for board
+
+				logln("Received board >>>")
+				message := p["message"].(map[string]interface{})
+				bidsMessage := message["bids"].([]interface{})
+				for _, bid := range bidsMessage {
+					b := bid.(map[string]interface{})
+					logf("[board] bid: %.0f %v\n", b["price"], b["size"])
+				}
+				asksMessage := message["asks"].([]interface{})
+				for _, ask := range asksMessage {
+					a := ask.(map[string]interface{})
+					logf("[board] ask: %.0f %v\n", a["price"], a["size"])
+				}
+				logln("<<< Received board")
+
+			} else {
+				logln("Received data:", data)
+			}
+		}
+	}
 }
