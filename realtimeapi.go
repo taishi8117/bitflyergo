@@ -104,6 +104,10 @@ func (tt *EventTime) UnmarshalJSON(data []byte) error {
 	return err
 }
 
+func (tt EventTime) MarshalJSON() ([]byte, error) {
+	return json.Marshal(tt.Time)
+}
+
 // String converts all fields value to one string.
 func (t *ChildOrderEvent) String() string {
 	tp := reflect.TypeOf(t)

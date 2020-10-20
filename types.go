@@ -1,6 +1,7 @@
 package bitflyergo
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -16,6 +17,10 @@ func (tt *TimeWithSecond) UnmarshalJSON(data []byte) error {
 	t, err := time.Parse("\"2006-01-02T15:04:05\"", string(data))
 	*tt = TimeWithSecond{&t}
 	return err
+}
+
+func (tt TimeWithSecond) MarshalJSON() ([]byte, error) {
+	return json.Marshal(tt.Time)
 }
 
 // Bitflyer is bitFlyer api client.
